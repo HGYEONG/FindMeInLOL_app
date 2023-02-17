@@ -53,11 +53,8 @@ public class SearchActivity extends AppCompatActivity {
     }
 
     private void setObserve() {
-        searchViewModel.liveData.observe(this, new Observer<ArrayList<String>>() {
-            @Override
-            public void onChanged(ArrayList<String> strings) {
-                searchViewRecyclerAdapter.notifyDataSetChanged();
-            }
+        searchViewModel.liveData.observe(this, strings -> {
+            searchViewRecyclerAdapter.notifyDataSetChanged();
         });
     }
     private void setListener() {
@@ -98,14 +95,11 @@ public class SearchActivity extends AppCompatActivity {
             }
         });
 
-        binding.searchButton1.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                binding.searchSearchView.setQuery("",false);
-                binding.searchSearchView.setMaxWidth(880);
-                binding.searchButton1.setVisibility(View.INVISIBLE);
-                binding.searchSearchView.clearFocus();
-            }
+        binding.searchButton1.setOnClickListener(v -> {
+            binding.searchSearchView.setQuery("", false);
+            binding.searchSearchView.setMaxWidth(880);
+            binding.searchButton1.setVisibility(View.INVISIBLE);
+            binding.searchSearchView.clearFocus();
         });
     }
 

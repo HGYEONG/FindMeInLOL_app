@@ -35,6 +35,10 @@ public class MainActivity extends AppCompatActivity {
         binding.mainSearchView.clearFocus();
         binding.mainSearchView.setInputType(InputType.TYPE_NULL);
 
+        setEventListener();
+    }
+
+    private void setEventListener() {
         binding.mainSearchView.setOnClickListener(v -> {
             binding.mainSearchView.clearFocus();
             Intent intent = new Intent(MainActivity.this, SearchActivity.class);
@@ -47,6 +51,11 @@ public class MainActivity extends AppCompatActivity {
                 Intent intent = new Intent(MainActivity.this, SearchActivity.class);
                 startActivity(intent);
             }
+        });
+
+        binding.mainTextView.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, LckMatchActivity.class);
+            startActivity(intent);
         });
     }
 }
