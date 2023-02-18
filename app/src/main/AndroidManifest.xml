@@ -30,4 +30,6 @@
         </activity>
     </application>
 
+    <!-- inter access permission -->
+    <uses-permission android:name="android.permission.INTERNET" />
 </manifest>

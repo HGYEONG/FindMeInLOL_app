@@ -1,39 +1,24 @@
 package com.example.findmeinlol.viewmodel;
 
-import android.util.Log;
-import android.view.View;
-
-import androidx.annotation.NonNull;
-import androidx.lifecycle.LifecycleOwner;
-import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModel;
 
+import com.example.findmeinlol.model.data.User;
 import com.example.findmeinlol.model.SearchModel;
 
 import java.util.ArrayList;
 
 public class SearchViewModel extends ViewModel {
     private SearchModel searchModel = new SearchModel();
-    public MutableLiveData<ArrayList<String>> liveData = new MutableLiveData<>();
+    public MutableLiveData<ArrayList<User>> liveData = new MutableLiveData<>();
 
     public SearchViewModel() {
-        liveData.setValue(searchModel.getNameList());
+        liveData.setValue(searchModel.getUserList());
     }
 
-    public boolean findName(String name) {
-        if(searchModel.findName(name)) {
-            return true;
-        }
-        else {
-            return false;
-        }
-    }
-
-    public void addName(String name) {
-        searchModel.addName(name);
-        liveData.setValue(searchModel.getNameList());
+    public void addUser(User user) {
+        searchModel.addUser(user);
+        liveData.setValue(searchModel.getUserList());
     }
 
     public SearchModel getSearchModel() {
@@ -46,6 +31,6 @@ public class SearchViewModel extends ViewModel {
 
     public void clearList() {
         searchModel.clearList();
-        liveData.setValue(searchModel.getNameList());
+        liveData.setValue(searchModel.getUserList());
     }
 }

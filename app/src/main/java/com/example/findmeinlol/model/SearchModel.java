@@ -1,36 +1,32 @@
 package com.example.findmeinlol.model;
 
+import com.example.findmeinlol.model.data.User;
+
 import java.util.ArrayList;
 
 public class SearchModel {
-    private static ArrayList<String> nameList = new ArrayList<>();
+    private static ArrayList<User> userList = new ArrayList<>();
+    private static User mUser = new User();
 
-    public boolean findName(String s) {
-        // ToDo: 서버로부터 소환사 조회
-        return true;
+    public void addUser(User user) {
+        userList.add(user);
     }
-
-    public void addName(String s) {
-        nameList.add(s);
-    }
-
-    public String getName(int idx) {
-        return nameList.get(idx);
-    }
+    
+    public User getUser(int idx) {return userList.get(idx); }
 
     public boolean duplicateName(String s) {
-        return nameList.contains(s);
+        return userList.contains(s);
     }
 
     public int getSize() {
-        return nameList.size();
+        return userList.size();
     }
 
     public void clearList() {
-        nameList.clear();
+        userList.clear();
     }
 
-    public ArrayList<String> getNameList() {
-        return nameList;
+    public ArrayList<User> getUserList() {
+        return userList;
     }
 }

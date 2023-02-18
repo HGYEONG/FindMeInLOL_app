@@ -10,6 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.findmeinlol.R;
+import com.example.findmeinlol.model.data.User;
 import com.example.findmeinlol.model.SearchModel;
 
 public class SearchViewRecyclerAdapter
@@ -35,8 +36,10 @@ public class SearchViewRecyclerAdapter
     @Override
     public void onBindViewHolder(@NonNull SearchViewRecyclerAdapter.ViewHolder holder,
                                  int position) {
-        String s = searchModel.getName(position);
-        holder.textView.setText(s);
+        User user = searchModel.getUser(position);
+
+        holder.name.setText(user.getName());
+        holder.level.setText(String.valueOf(user.getLevel()));
     }
 
     @Override
@@ -45,12 +48,14 @@ public class SearchViewRecyclerAdapter
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
-        TextView textView ;
+        TextView name;
+        TextView level;
 
         ViewHolder(View view) {
             super(view);
 
-            textView = view.findViewById(R.id.recyclerview_item_text);
+            name = view.findViewById(R.id.recyclerview_item_text_name);
+            level = view.findViewById(R.id.recyclerview_item_text_level);
         }
     }
 
