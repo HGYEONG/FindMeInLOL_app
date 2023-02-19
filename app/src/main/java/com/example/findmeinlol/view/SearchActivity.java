@@ -1,53 +1,93 @@
 package com.example.findmeinlol.view;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.databinding.DataBindingUtil;
+import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import android.content.DialogInterface;
+import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.provider.Contacts;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
-import com.example.findmeinlol.BuildConfig;
+import com.example.findmeinlol.RiotAPIRepository;
 import com.example.findmeinlol.R;
-import com.example.findmeinlol.model.retrofit.RetrofitAPI;
+import com.example.findmeinlol.RiotImageAPIRepository;
+import com.example.findmeinlol.APIListener;
 import com.example.findmeinlol.model.data.User;
 import com.example.findmeinlol.databinding.ActivitySearchBinding;
 import com.example.findmeinlol.viewmodel.SearchViewModel;
+import com.example.findmeinlol.viewmodel.UIListener;
 import com.example.findmeinlol.viewmodel.adapter.SearchViewRecyclerAdapter;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 public class SearchActivity extends AppCompatActivity {
 
-    private SearchViewModel searchViewModel;
-    private ActivitySearchBinding binding;
-    private SearchViewRecyclerAdapter searchViewRecyclerAdapter;
+    private SearchViewModel mSearchViewModel;
+    private ActivitySearchBinding mBinding;
+    private SearchViewRecyclerAdapter mSearchViewRecyclerAdapter;
+    private UIListener mUiListener;
+
+    class SearchViewModelFactory implements ViewModelProvider.Factory {
+        UIListener uiListener;
+
+        public SearchViewModelFactory(UIListener uiListener) {
+            this.uiListener = uiListener;
+        }
+        @NonNull
+        @Override
+        public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
+            if (modelClass.isAssignableFrom(SearchViewModel.class)) {
+                return (T) new SearchViewModel(this.uiListener);
+            }
+            return null;
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_search);
-        searchViewModel = new ViewModelProvider(this,
-                (ViewModelProvider.Factory) ViewModelProvider.AndroidViewModelFactory
-                .getInstance(getApplication())).get(SearchViewModel.class);
+        mBinding = DataBindingUtil.setContentView(this, R.layout.activity_search);
 
-        binding.setLifecycleOwner(this);
-        binding.setSearchViewModel(searchViewModel);
+        mUiListener = new UIListener() {
+            AlertDialog.Builder alertDialog = new AlertDialog.Builder(SearchActivity.this)
+                    .setPositiveButton("확인", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    });
 
-        setSupportActionBar(binding.searchToolbar);
+            @Override
+            public void onUpdated(boolean flag) {
+                if (flag) {
+                    mSearchViewRecyclerAdapter.notifyDataSetChanged();
+                }
+                else {
+                    alertDialog.setMessage("존재하지 않는 소환사입니다.");
+                    alertDialog.show();
+                }
+            }
+        };
+
+        SearchViewModelFactory searchViewModelFactory = new SearchViewModelFactory(mUiListener);
+        mSearchViewModel = new ViewModelProvider(this,searchViewModelFactory).
+                get(SearchViewModel.class);
+
+        mBinding.setLifecycleOwner(this);
+        mBinding.setSearchViewModel(mSearchViewModel);
+
+        setSupportActionBar(mBinding.searchToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle("");
 
@@ -57,87 +97,44 @@ public class SearchActivity extends AppCompatActivity {
     }
 
     private void setObserve() {
-        searchViewModel.liveData.observe(this, users -> {
-            Log.d("SVAT", "hi");
-            searchViewRecyclerAdapter.notifyDataSetChanged();
+        mSearchViewModel.liveData.observe(this, users -> {
+            mSearchViewRecyclerAdapter.notifyDataSetChanged();
         });
     }
     private void setListener() {
-        binding.searchSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            User user = new User();
+        mBinding.searchSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                Retrofit retrofit = new Retrofit.Builder()
-                        .baseUrl("https://kr.api.riotgames.com/lol/")
-                        .addConverterFactory(GsonConverterFactory.create())
-                        .build();
-
-                RetrofitAPI retrofitAPI = retrofit.create(RetrofitAPI.class);
-
-                retrofitAPI.getData(query, BuildConfig.riot_api_key).enqueue(new Callback<User>() {
-                    @Override
-                    public void onResponse(Call<User> call, Response<User> response) {
-                        if (response.isSuccessful()) {
-                            user = response.body();
-                            Log.d("SM", response.body().getId() + " " +
-                                    response.body().getName() + " " +
-                                    response.body().getLevel());
-                            Log.d("SVAT", "add name : " + user.getName());
-                            if (user != null) {
-                                if (!searchViewModel.duplicateName(user.getName())) {
-                                    Log.d("SVAT", "add name : " + user.getName());
-                                    searchViewModel.addUser(user);
-                                }
-                                else {
-                                    Log.d("SVAT", "not add name : " + user.getName());
-                                }
-                            }
-                            else {
-                                Log.d("SVAT", "not add name : " + query);
-                                Toast toast = Toast.makeText(getApplicationContext(),
-                                        "존재하지 않는 소환사 입니다.", Toast.LENGTH_SHORT);
-                                toast.setGravity(Gravity.CENTER, 0, 0);
-                                toast.show();
-                            }
-                            binding.searchSearchView.clearFocus();
-                        }
-                    }
-                    @Override
-                    public void onFailure(Call<User> call, Throwable t) {
-                        Log.d("SM", "실패...");
-                    }
-                });
-
+                mSearchViewModel.findUser(query);
                 return false;
             }
 
             @Override
             public boolean onQueryTextChange(String newText) {
                 if (newText.isEmpty()) {
-                    binding.searchSearchView.setMaxWidth(880);
-                    binding.searchButton1.setVisibility(View.INVISIBLE);
+                    mBinding.searchSearchView.setMaxWidth(880);
+                    mBinding.searchButton1.setVisibility(View.INVISIBLE);
                 }
                 else {
-                    binding.searchSearchView.setMaxWidth(750);
-                    binding.searchButton1.setVisibility(View.VISIBLE);
+                    mBinding.searchSearchView.setMaxWidth(750);
+                    mBinding.searchButton1.setVisibility(View.VISIBLE);
                 }
                 return false;
             }
         });
 
-        binding.searchButton1.setOnClickListener(v -> {
-            binding.searchSearchView.setQuery("", false);
-            binding.searchSearchView.setMaxWidth(880);
-            binding.searchButton1.setVisibility(View.INVISIBLE);
-            binding.searchSearchView.clearFocus();
+        mBinding.searchButton1.setOnClickListener(v -> {
+            mBinding.searchSearchView.setQuery("", false);
+            mBinding.searchSearchView.setMaxWidth(880);
+            mBinding.searchButton1.setVisibility(View.INVISIBLE);
+            mBinding.searchSearchView.clearFocus();
         });
     }
 
     private void setSearchViewRecyclerView() {
-        binding.searchRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        searchViewRecyclerAdapter = new SearchViewRecyclerAdapter(searchViewModel.getSearchModel());
-        binding.searchRecyclerView.setAdapter(searchViewRecyclerAdapter);
-
+        mBinding.searchRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        mSearchViewRecyclerAdapter = new SearchViewRecyclerAdapter(mSearchViewModel);
+        mBinding.searchRecyclerView.setAdapter(mSearchViewRecyclerAdapter);
         addDivideLine();
     }
 
@@ -146,7 +143,7 @@ public class SearchActivity extends AppCompatActivity {
                 new DividerItemDecoration(
                         getApplicationContext(),
                         new LinearLayoutManager(this).getOrientation());
-        binding.searchRecyclerView.addItemDecoration(dividerItemDecoration);
+        mBinding.searchRecyclerView.addItemDecoration(dividerItemDecoration);
     }
 
     @Override

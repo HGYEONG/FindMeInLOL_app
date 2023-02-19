@@ -1,0 +1,11 @@
+package com.example.findmeinlol.model.retrofit;
+
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.http.GET;
+import retrofit2.http.Path;
+
+public interface RiotImageAPI {
+    @GET("{imagePath}")
+    Call<ResponseBody> getImage(@Path("imagePath") String imagePath);
+}

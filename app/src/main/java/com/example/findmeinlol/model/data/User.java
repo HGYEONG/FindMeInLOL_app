@@ -1,5 +1,7 @@
 package com.example.findmeinlol.model.data;
 
+import android.graphics.Bitmap;
+
 import com.google.gson.annotations.SerializedName;
 
 public class User {
@@ -15,6 +17,8 @@ public class User {
     @SerializedName("summonerLevel")
     private long level;
 
+    private Bitmap profileIcon;
+
     public String getId() {
         return id;
     }
@@ -25,5 +29,17 @@ public class User {
 
     public long getLevel() {
         return level;
+    }
+
+    public int getProfileIconId() {
+        return profileIconId;
+    }
+
+    public void setProfileIcon(Bitmap profileIcon) {
+        this.profileIcon = profileIcon;
+    }
+
+    public Bitmap getProfileIcon() {
+        return profileIcon;
     }
 }
