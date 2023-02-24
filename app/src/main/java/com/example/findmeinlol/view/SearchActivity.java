@@ -11,55 +11,57 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import android.content.DialogInterface;
-import android.graphics.Bitmap;
+import android.content.Intent;
 import android.os.Bundle;
-import android.provider.Contacts;
+import android.os.Parcelable;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Toast;
 
-import com.example.findmeinlol.RiotAPIRepository;
 import com.example.findmeinlol.R;
-import com.example.findmeinlol.RiotImageAPIRepository;
-import com.example.findmeinlol.APIListener;
-import com.example.findmeinlol.model.data.User;
 import com.example.findmeinlol.databinding.ActivitySearchBinding;
+import com.example.findmeinlol.model.data.User;
 import com.example.findmeinlol.viewmodel.SearchViewModel;
-import com.example.findmeinlol.viewmodel.UIListener;
+import com.example.findmeinlol.viewmodel.adapter.CallBackListener;
 import com.example.findmeinlol.viewmodel.adapter.SearchViewRecyclerAdapter;
+import com.google.gson.Gson;
+
+import java.io.Serializable;
 
 public class SearchActivity extends AppCompatActivity {
 
     private SearchViewModel mSearchViewModel;
     private ActivitySearchBinding mBinding;
     private SearchViewRecyclerAdapter mSearchViewRecyclerAdapter;
-    private UIListener mUiListener;
 
-    class SearchViewModelFactory implements ViewModelProvider.Factory {
-        UIListener uiListener;
 
-        public SearchViewModelFactory(UIListener uiListener) {
-            this.uiListener = uiListener;
-        }
-        @NonNull
+    private CallBackListener callBackListener = new CallBackListener() {
         @Override
-        public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-            if (modelClass.isAssignableFrom(SearchViewModel.class)) {
-                return (T) new SearchViewModel(this.uiListener);
-            }
-            return null;
+        public void itemClicked(int pos) {
+            Log.d("SA", String.valueOf(pos));
+            Intent intent = new Intent(getApplicationContext(), SearchResultActivity.class);
+            User user = mSearchViewModel.getSearchModel().getUser(pos);
+            intent.putExtra("User", new Gson().toJson(user));
+            startActivity(intent);
         }
-    }
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+        @Override
+        public void deleteBtnClicked(int pos) {
+            mSearchViewModel.deleteUser(pos);
+        }
 
-        mBinding = DataBindingUtil.setContentView(this, R.layout.activity_search);
+        @Override
+        public void favoriteBtnClicked(int pos, boolean isChecked) {
+            if (isChecked) {
+                Log.d("SA", "add db");
+            }
+            else {
+                Log.d("SA", "delete db");
+            }
+        }
 
-        mUiListener = new UIListener() {
+        @Override
+        public void userInfoUpdated(boolean need, User user) {
             AlertDialog.Builder alertDialog = new AlertDialog.Builder(SearchActivity.this)
                     .setPositiveButton("확인", new DialogInterface.OnClickListener() {
                         @Override
@@ -68,21 +70,28 @@ public class SearchActivity extends AppCompatActivity {
                         }
                     });
 
-            @Override
-            public void onUpdated(boolean flag) {
-                if (flag) {
-                    mSearchViewRecyclerAdapter.notifyDataSetChanged();
-                }
-                else {
-                    alertDialog.setMessage("존재하지 않는 소환사입니다.");
-                    alertDialog.show();
-                }
+            if (need) {
+                mSearchViewRecyclerAdapter.notifyDataSetChanged();
+                Intent intent = new Intent(SearchActivity.this, SearchResultActivity.class);
+                intent.putExtra("User", new Gson().toJson(user));
+                startActivity(intent);
             }
-        };
+            else {
+                alertDialog.setMessage("존재하지 않는 소환사입니다.");
+                alertDialog.show();
+            }
+        }
+    };
 
-        SearchViewModelFactory searchViewModelFactory = new SearchViewModelFactory(mUiListener);
-        mSearchViewModel = new ViewModelProvider(this,searchViewModelFactory).
-                get(SearchViewModel.class);
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        mBinding = DataBindingUtil.setContentView(this, R.layout.activity_search);
+
+        mSearchViewModel = new ViewModelProvider(this,
+                (ViewModelProvider.Factory) ViewModelProvider.AndroidViewModelFactory
+                        .getInstance(getApplication())).get(SearchViewModel.class);
 
         mBinding.setLifecycleOwner(this);
         mBinding.setSearchViewModel(mSearchViewModel);
@@ -91,9 +100,11 @@ public class SearchActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle("");
 
+
         setListener();
         setSearchViewRecyclerView();
         setObserve();
+        mSearchViewModel.setCallBackListener(callBackListener);
     }
 
     private void setObserve() {
@@ -101,11 +112,12 @@ public class SearchActivity extends AppCompatActivity {
             mSearchViewRecyclerAdapter.notifyDataSetChanged();
         });
     }
+
     private void setListener() {
         mBinding.searchSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                mSearchViewModel.findUser(query);
+                mSearchViewModel.setUserInfo(query);
                 return false;
             }
 
@@ -134,6 +146,7 @@ public class SearchActivity extends AppCompatActivity {
     private void setSearchViewRecyclerView() {
         mBinding.searchRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         mSearchViewRecyclerAdapter = new SearchViewRecyclerAdapter(mSearchViewModel);
+        mSearchViewRecyclerAdapter.setCallBackListener(callBackListener);
         mBinding.searchRecyclerView.setAdapter(mSearchViewRecyclerAdapter);
         addDivideLine();
     }

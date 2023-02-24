@@ -1,14 +1,15 @@
 package com.example.findmeinlol.viewmodel;
 
 import android.graphics.Bitmap;
-import android.util.Log;
 
+import androidx.databinding.Bindable;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.example.findmeinlol.APIListener;
 import com.example.findmeinlol.model.data.User;
 import com.example.findmeinlol.model.SearchModel;
+import com.example.findmeinlol.viewmodel.adapter.CallBackListener;
 
 import java.util.ArrayList;
 
@@ -16,11 +17,10 @@ public class SearchViewModel extends ViewModel {
     private SearchModel searchModel = new SearchModel();
     public MutableLiveData<ArrayList<User>> liveData = new MutableLiveData<>();
     private User mUser;
-    private UIListener mUIListener;
+    private CallBackListener mCallBackListener;
 
-    public SearchViewModel(UIListener uiListener) {
+    public SearchViewModel() {
         liveData.setValue(searchModel.getUserList());
-        this.mUIListener = uiListener;
     }
 
     private void addUser(User user) {
@@ -46,8 +46,8 @@ public class SearchViewModel extends ViewModel {
         liveData.setValue(searchModel.getUserList());
     }
 
-    public void findUser(String name) {
-        searchModel.findUser(name, mApiListener);
+    public void setUserInfo(String name) {
+        searchModel.setUserInfo(name, mApiListener);
     }
 
     private APIListener mApiListener = new APIListener() {
@@ -61,14 +61,18 @@ public class SearchViewModel extends ViewModel {
                 }
             }
             else {
-                mUIListener.onUpdated(false);
+                mCallBackListener.userInfoUpdated(false, mUser);
             }
         }
 
         @Override
         public void setProfileIcon(Bitmap bitmap) {
             mUser.setProfileIcon(bitmap);
-            mUIListener.onUpdated(true);
+            mCallBackListener.userInfoUpdated(true, mUser);
         }
     };
+
+    public void setCallBackListener(CallBackListener callBackListener) {
+        this.mCallBackListener = callBackListener;
+    }
 }
