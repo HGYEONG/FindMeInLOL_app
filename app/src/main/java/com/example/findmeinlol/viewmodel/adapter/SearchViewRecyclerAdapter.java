@@ -1,6 +1,7 @@
 package com.example.findmeinlol.viewmodel.adapter;
 
 import android.net.Uri;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
@@ -19,9 +20,14 @@ public class SearchViewRecyclerAdapter
     SearchModel mSearchModel;
     CallBackListener mCallBackListener;
 
+    public String name;
+    public String tier;
+    public long level;
+    public boolean checked;
+
     public SearchViewRecyclerAdapter(SearchViewModel searchViewModel) {
         this.mSearchViewModel = searchViewModel;
-        mSearchModel = mSearchViewModel.getSearchModel();
+        mSearchModel = SearchModel.getInstance();
     }
 
     public void setCallBackListener(CallBackListener mCallBackListener) {
@@ -42,9 +48,11 @@ public class SearchViewRecyclerAdapter
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         User user = mSearchModel.getUser(position);
-        holder.recyclerviewItemBinding.setUser(user);
+        holder.recyclerviewItemBinding.setViewModel(this);
         holder.recyclerviewItemBinding.recyclerviewItemImgUser.setImageBitmap(user.getProfileIcon());
         holder.recyclerviewItemBinding.recyclerviewItemImgTier.setImageURI(Uri.parse(user.getTierIconId()));
+
+        setUI(user);
         setListener(holder, position);
     }
 
@@ -61,6 +69,13 @@ public class SearchViewRecyclerAdapter
         holder.itemView.setOnClickListener(v -> {
             mCallBackListener.itemClicked(position);
         });
+    }
+
+    private void setUI(User user) {
+        this.name = user.getName();
+        this.level = user.getLevel();
+        this.tier = user.getTier();
+        this.checked = user.getFavorite();
     }
 
     @Override

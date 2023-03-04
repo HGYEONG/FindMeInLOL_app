@@ -7,6 +7,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
 
+import com.example.findmeinlol.model.SearchModel;
 import com.google.gson.annotations.SerializedName;
 
 import java.io.Serializable;
@@ -32,6 +33,8 @@ public class User {
 
     @SerializedName("queueType")
     private String queueType;
+
+    private boolean favorite;
 
     private Bitmap profileIcon;
 
@@ -74,4 +77,8 @@ public class User {
     public void setTierIconId(String tierIconId) { this.tierIconId = tierIconId; }
 
     public String getTierIconId() { return tierIconId; }
+
+    public void setFavorite(boolean check) { this.favorite = check; }
+
+    public boolean getFavorite() { return this.favorite; }
 }

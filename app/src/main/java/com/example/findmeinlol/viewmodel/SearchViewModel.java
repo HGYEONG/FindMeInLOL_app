@@ -2,11 +2,11 @@ package com.example.findmeinlol.viewmodel;
 
 import android.graphics.Bitmap;
 
-import androidx.databinding.Bindable;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.example.findmeinlol.APIListener;
+import com.example.findmeinlol.model.UserRepository;
 import com.example.findmeinlol.model.data.User;
 import com.example.findmeinlol.model.SearchModel;
 import com.example.findmeinlol.viewmodel.adapter.CallBackListener;
@@ -14,40 +14,44 @@ import com.example.findmeinlol.viewmodel.adapter.CallBackListener;
 import java.util.ArrayList;
 
 public class SearchViewModel extends ViewModel {
-    private SearchModel searchModel = new SearchModel();
-    public MutableLiveData<ArrayList<User>> liveData = new MutableLiveData<>();
+    private SearchModel mSearchModel = SearchModel.getInstance();
+    public MutableLiveData<ArrayList<User>> mUserArrayListLiveData = UserRepository.getInstance().
+            getUserArrayListLiveData();
+
     private User mUser;
     private CallBackListener mCallBackListener;
 
-    public SearchViewModel() {
-        liveData.setValue(searchModel.getUserList());
-    }
+    public String name;
+    public String tier;
+    public long level;
+    public boolean checked;
 
     private void addUser(User user) {
-        searchModel.addUser(user);
-        liveData.setValue(searchModel.getUserList());
+        setUi();
+        mSearchModel.addUser(user);
+        mUserArrayListLiveData.setValue(mSearchModel.getUserList());
     }
 
     public SearchModel getSearchModel() {
-        return searchModel;
+        return mSearchModel;
     }
 
     public boolean isName(String name) {
-        return searchModel.isName(name);
+        return mSearchModel.isName(name);
     }
 
     public void clearList() {
-        searchModel.clearList();
-        liveData.setValue(searchModel.getUserList());
+        mSearchModel.clearList();
+        mUserArrayListLiveData.setValue(mSearchModel.getUserList());
     }
 
     public void deleteUser(int idx) {
-        searchModel.deleteUser(idx);
-        liveData.setValue(searchModel.getUserList());
+        mSearchModel.deleteUser(idx);
+        mUserArrayListLiveData.setValue(mSearchModel.getUserList());
     }
 
     public void setUserInfo(String name) {
-        searchModel.setUserInfo(name, mApiListener);
+        mSearchModel.setUserInfo(name, mApiListener);
     }
 
     private APIListener mApiListener = new APIListener() {
@@ -56,7 +60,7 @@ public class SearchViewModel extends ViewModel {
             mUser = user;
             if (user != null) {
                 if (!isName(mUser.getName())) {
-                    searchModel.getProfileIconBitmap(mUser.getProfileIconId(), mApiListener);
+                    mSearchModel.getProfileIconBitmap(mUser.getProfileIconId(), mApiListener);
                     addUser(mUser);
                 }
             }
@@ -74,5 +78,12 @@ public class SearchViewModel extends ViewModel {
 
     public void setCallBackListener(CallBackListener callBackListener) {
         this.mCallBackListener = callBackListener;
+    }
+
+    public void setUi() {
+        this.name = mUser.getName();
+        this.tier = mUser.getTier();
+        this.level = mUser.getLevel();
+        this.checked = mUser.getFavorite();
     }
 }

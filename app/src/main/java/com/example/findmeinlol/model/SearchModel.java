@@ -1,5 +1,9 @@
 package com.example.findmeinlol.model;
 
+import android.util.Log;
+
+import androidx.lifecycle.MutableLiveData;
+
 import com.example.findmeinlol.APIListener;
 import com.example.findmeinlol.R;
 import com.example.findmeinlol.RiotAPIRepository;
@@ -62,5 +66,11 @@ public class SearchModel {
     public void getProfileIconBitmap(int profileIconId, APIListener apiListener) {
         RiotImageAPIRepository riotImageAPIRepository = new RiotImageAPIRepository(apiListener);
         riotImageAPIRepository.getProfileIconImage(profileIconId);
+    }
+
+    public void setFavorite(int idx, boolean checked) {
+        Log.d("SRM", "setFavorite " + checked);
+        userList.get(idx).setFavorite(checked);
+        Log.d("SRM", "setFavorite " + userList.get(idx).getFavorite());
     }
 }

@@ -1,11 +1,11 @@
 package com.example.findmeinlol.view;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.databinding.DataBindingUtil;
-import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -13,7 +13,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -26,8 +25,6 @@ import com.example.findmeinlol.viewmodel.adapter.CallBackListener;
 import com.example.findmeinlol.viewmodel.adapter.SearchViewRecyclerAdapter;
 import com.google.gson.Gson;
 
-import java.io.Serializable;
-
 public class SearchActivity extends AppCompatActivity {
 
     private SearchViewModel mSearchViewModel;
@@ -38,10 +35,10 @@ public class SearchActivity extends AppCompatActivity {
     private CallBackListener callBackListener = new CallBackListener() {
         @Override
         public void itemClicked(int pos) {
-            Log.d("SA", String.valueOf(pos));
             Intent intent = new Intent(getApplicationContext(), SearchResultActivity.class);
             User user = mSearchViewModel.getSearchModel().getUser(pos);
             intent.putExtra("User", new Gson().toJson(user));
+            intent.putExtra("pos", pos);
             startActivity(intent);
         }
 
@@ -53,10 +50,10 @@ public class SearchActivity extends AppCompatActivity {
         @Override
         public void favoriteBtnClicked(int pos, boolean isChecked) {
             if (isChecked) {
-                Log.d("SA", "add db");
+                mSearchViewModel.getSearchModel().getUser(pos).setFavorite(true);
             }
             else {
-                Log.d("SA", "delete db");
+                mSearchViewModel.getSearchModel().getUser(pos).setFavorite(false);
             }
         }
 
@@ -107,8 +104,23 @@ public class SearchActivity extends AppCompatActivity {
         mSearchViewModel.setCallBackListener(callBackListener);
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    @Override
+    protected void onResume() {
+        if(mSearchViewModel.getSearchModel().getSize() > 0 ) {
+            Log.d("SAA", "onResume "
+                    + mSearchViewModel.getSearchModel().getUser(0).getFavorite());
+        }
+        super.onResume();
+    }
+
     private void setObserve() {
-        mSearchViewModel.liveData.observe(this, users -> {
+        mSearchViewModel.mUserArrayListLiveData.observe(this, users -> {
+            if(users.size() > 0 ) Log.d("SAA", "observe " + users.get(0).getFavorite());
             mSearchViewRecyclerAdapter.notifyDataSetChanged();
         });
     }
