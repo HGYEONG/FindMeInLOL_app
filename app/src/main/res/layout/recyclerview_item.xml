@@ -4,8 +4,8 @@
 
     <data>
         <variable
-            name="viewModel"
-            type="com.example.findmeinlol.viewmodel.adapter.SearchViewRecyclerAdapter" />
+            name="user"
+            type="com.example.findmeinlol.model.data.User" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -37,7 +37,7 @@
                 android:layout_height="wrap_content"
                 android:gravity="center"
                 android:textAlignment="center"
-                android:text="@{viewModel.name}"
+                android:text="@{user.name}"
                 android:textSize="15sp"/>
 
             <LinearLayout
@@ -59,7 +59,7 @@
                     android:gravity="center"
                     android:textAlignment="center"
                     android:textSize="10sp"
-                    android:text="@{Long.toString(viewModel.level)}"
+                    android:text="@{Long.toString(user.level)}"
                     android:layout_marginRight="5dp"/>
 
                 <ImageView
@@ -74,7 +74,7 @@
                     android:layout_height="wrap_content"
                     android:gravity="center"
                     android:textAlignment="center"
-                    android:text="@{viewModel.tier}"
+                    android:text="@{user.tier}"
                     android:textSize="10sp"/>
             </LinearLayout>
         </LinearLayout>
@@ -85,7 +85,6 @@
             android:layout_height="wrap_content"
             android:background="@null"
             android:button="@drawable/recyclerview_favorite_checkbox"
-            android:checked="@{viewModel.checked}"
             android:layout_marginRight="15dp"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintRight_toLeftOf="@id/recyclerview_item_btn_delete"

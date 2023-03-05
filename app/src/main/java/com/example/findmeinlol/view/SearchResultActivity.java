@@ -22,8 +22,6 @@ import com.google.gson.Gson;
 public class SearchResultActivity extends AppCompatActivity {
     private SearchResultViewModel searchResultViewModel;
     private ActivitySearchResultBinding mBinding;
-    User user;
-    private int pos;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,10 +39,9 @@ public class SearchResultActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle("");
 
-        user = new Gson().fromJson(getIntent().getStringExtra("User"), User.class);
-        pos = getIntent().getIntExtra("pos", pos);
-        searchResultViewModel.init(user, pos);
-        setUI();
+        User user = new Gson().fromJson(getIntent().getStringExtra("User"), User.class);
+        searchResultViewModel.init(user);
+        mBinding.searchResultImgProfile.setImageBitmap(user.getProfileIcon());
     }
 
     @Override
@@ -56,9 +53,5 @@ public class SearchResultActivity extends AppCompatActivity {
             }
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    private void setUI() {
-        mBinding.searchResultImgProfile.setImageBitmap(user.getProfileIcon());
     }
 }
