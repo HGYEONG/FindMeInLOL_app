@@ -8,7 +8,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.findmeinlol.databinding.RecyclerviewItemBinding;
-import com.example.findmeinlol.model.data.User;
+import com.example.findmeinlol.model.data.SummonerDto;
 import com.example.findmeinlol.model.SearchModel;
 import com.example.findmeinlol.viewmodel.SearchViewModel;
 
@@ -41,10 +41,10 @@ public class SearchViewRecyclerAdapter
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        User user = mSearchModel.getUser(position);
-        holder.recyclerviewItemBinding.setUser(user);
-        holder.recyclerviewItemBinding.recyclerviewItemImgUser.setImageBitmap(user.getProfileIcon());
-        holder.recyclerviewItemBinding.recyclerviewItemImgTier.setImageURI(Uri.parse(user.getTierIconId()));
+        SummonerDto summonerDto = mSearchViewModel.getSearchModel().getSummoner(position);
+        holder.recyclerviewItemBinding.setSummonerDto(summonerDto);
+        holder.recyclerviewItemBinding.recyclerviewItemImgUser.setImageBitmap(summonerDto.getProfileIcon());
+        holder.recyclerviewItemBinding.recyclerviewItemImgTier.setImageURI(Uri.parse(summonerDto.getTierIconId()));
         setListener(holder, position);
     }
 

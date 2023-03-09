@@ -4,8 +4,8 @@
 
     <data>
         <variable
-            name="user"
-            type="com.example.findmeinlol.model.data.User" />
+            name="summonerDto"
+            type="com.example.findmeinlol.model.data.SummonerDto" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -37,7 +37,7 @@
                 android:layout_height="wrap_content"
                 android:gravity="center"
                 android:textAlignment="center"
-                android:text="@{user.name}"
+                android:text="@{summonerDto.name}"
                 android:textSize="15sp"/>
 
             <LinearLayout
@@ -59,7 +59,7 @@
                     android:gravity="center"
                     android:textAlignment="center"
                     android:textSize="10sp"
-                    android:text="@{Long.toString(user.level)}"
+                    android:text="@{Long.toString(summonerDto.level)}"
                     android:layout_marginRight="5dp"/>
 
                 <ImageView
@@ -74,7 +74,7 @@
                     android:layout_height="wrap_content"
                     android:gravity="center"
                     android:textAlignment="center"
-                    android:text="@{user.tier}"
+                    android:text="@{summonerDto.tier}"
                     android:textSize="10sp"/>
             </LinearLayout>
         </LinearLayout>

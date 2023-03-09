@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <data>
+        <variable
+            name="participant"
+            type="com.example.findmeinlol.model.data.ParticipantDto" />
+    </data>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/result_recyclerview_result"
+            android:layout_width="40dp"
+            android:layout_height="100dp"
+            android:textAlignment="center"
+            android:gravity="center" />
+
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="15dp">
+
+            <LinearLayout
+                android:id="@+id/result_recyclerview_linearlayout_total"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintLeft_toLeftOf="parent"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:id="@+id/result_recyclerview_linearlayout_top"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:id="@+id/result_recyclerview_champion_img"
+                        android:layout_width="50dp"
+                        android:layout_height="50dp" />
+
+                    <TextView
+                        android:id="@+id/result_recyclerview_kda"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="15sp"
+                        android:text="@{Integer.toString(participant.kills) + '/' + Integer.toString(participant.deaths) + '/' + Integer.toString(participant.assists)}"/>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="10dp">
+
+                    <ImageView
+                        android:id="@+id/result_recyclerview_img_item0"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_marginRight="5dp"
+                        android:src="@drawable/delete_icon"/>
+
+                    <ImageView
+                        android:id="@+id/result_recyclerview_img_item1"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_marginRight="5dp"
+                        android:src="@drawable/delete_icon"/>
+
+                    <ImageView
+                        android:id="@+id/result_recyclerview_img_item2"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_marginRight="5dp"
+                        android:src="@drawable/delete_icon"/>
+
+                    <ImageView
+                        android:id="@+id/result_recyclerview_img_item3"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_marginRight="5dp"
+                        android:src="@drawable/delete_icon"/>
+
+                    <ImageView
+                        android:id="@+id/result_recyclerview_img_item4"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_marginRight="5dp"
+                        android:src="@drawable/delete_icon"/>
+
+                    <ImageView
+                        android:id="@+id/result_recyclerview_img_item5"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_marginRight="5dp"
+                        android:src="@drawable/delete_icon"/>
+
+                    <ImageView
+                        android:id="@+id/result_recyclerview_img_item6"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:src="@drawable/delete_icon"/>
+                </LinearLayout>
+
+            </LinearLayout>
+
+
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </LinearLayout>
+
+</layout>

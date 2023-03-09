@@ -5,7 +5,6 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.databinding.DataBindingUtil;
-import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -13,20 +12,20 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 
 import com.example.findmeinlol.R;
 import com.example.findmeinlol.databinding.ActivitySearchBinding;
-import com.example.findmeinlol.model.data.User;
+import com.example.findmeinlol.model.data.ParticipantDto;
+import com.example.findmeinlol.model.data.SummonerDto;
 import com.example.findmeinlol.viewmodel.SearchViewModel;
 import com.example.findmeinlol.viewmodel.adapter.CallBackListener;
 import com.example.findmeinlol.viewmodel.adapter.SearchViewRecyclerAdapter;
 import com.google.gson.Gson;
 
-import java.io.Serializable;
+import java.util.Map;
 
 public class SearchActivity extends AppCompatActivity {
 
@@ -34,14 +33,13 @@ public class SearchActivity extends AppCompatActivity {
     private ActivitySearchBinding mBinding;
     private SearchViewRecyclerAdapter mSearchViewRecyclerAdapter;
 
-
     private CallBackListener callBackListener = new CallBackListener() {
         @Override
         public void itemClicked(int pos) {
             Log.d("SA", String.valueOf(pos));
             Intent intent = new Intent(getApplicationContext(), SearchResultActivity.class);
-            User user = mSearchViewModel.getSearchModel().getUser(pos);
-            intent.putExtra("User", new Gson().toJson(user));
+            SummonerDto summonerDto = mSearchViewModel.getSearchModel().getSummoner(pos);
+            intent.putExtra("Summoner", new Gson().toJson(summonerDto));
             startActivity(intent);
         }
 
@@ -54,34 +52,45 @@ public class SearchActivity extends AppCompatActivity {
         public void favoriteBtnClicked(int pos, boolean isChecked) {
             if (isChecked) {
                 Log.d("SA", "add db");
-            }
-            else {
+            } else {
                 Log.d("SA", "delete db");
             }
         }
 
         @Override
-        public void userInfoUpdated(boolean need, User user) {
-            AlertDialog.Builder alertDialog = new AlertDialog.Builder(SearchActivity.this)
-                    .setPositiveButton("확인", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.dismiss();
-                        }
-                    });
+        public void onUpdated(Object response) {
+        }
 
-            if (need) {
-                mSearchViewRecyclerAdapter.notifyDataSetChanged();
+        @Override
+        public void onFinished() {
+            SummonerDto summonerDto = mSearchViewModel.getSearchModel().getSummoner();
+            Log.d("*****", "onFinished!");
+            if (summonerDto != null) {
+                if (mSearchViewModel.getSearchModel().isName(summonerDto.getName())) return;
+                mSearchViewModel.addUser();
                 Intent intent = new Intent(SearchActivity.this, SearchResultActivity.class);
-                intent.putExtra("User", new Gson().toJson(user));
+                intent.putExtra("Summoner", new Gson().toJson(summonerDto));
                 startActivity(intent);
-            }
-            else {
+            } else {
+                AlertDialog.Builder alertDialog = new AlertDialog.Builder(SearchActivity.this)
+                        .setPositiveButton("확인", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        });
                 alertDialog.setMessage("존재하지 않는 소환사입니다.");
                 alertDialog.show();
             }
         }
     };
+
+    @Override
+    protected void onResume() {
+        mSearchViewModel.liveData.setValue(mSearchViewModel.getSearchModel().getUserList());
+        mSearchViewRecyclerAdapter.notifyDataSetChanged();
+        super.onResume();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -107,9 +116,40 @@ public class SearchActivity extends AppCompatActivity {
         mSearchViewModel.setCallBackListener(callBackListener);
     }
 
+
+    int count = 0;
     private void setObserve() {
         mSearchViewModel.liveData.observe(this, users -> {
             mSearchViewRecyclerAdapter.notifyDataSetChanged();
+        });
+
+        mSearchViewModel.summonerDtoMutableLiveData.observe(this, summonerDto -> {
+            mSearchViewModel.getSearchModel().setSummoner(summonerDto);
+            if (summonerDto == null) {
+                callBackListener.onFinished();
+            }
+        });
+
+        mSearchViewModel.participantDtoMutableLiveData.observe(this, participantDto -> {
+            mSearchViewModel.addParticipantDto(participantDto);
+        });
+
+        mSearchViewModel.itemIconMutableLiveData.observe(this, item -> {
+            count++;
+            ParticipantDto participantDto = mSearchViewModel.
+                    getParticipantArrayList().get(item.getParticipantNum());
+            participantDto.getItemIcons()[item.getItemNum()] = item.getItemBitmap();
+
+            if(count == mSearchViewModel.integerMutableLiveData.getValue() * 7) {
+                callBackListener.onFinished();
+                count = 0;
+            }
+        });
+
+        mSearchViewModel.championIconMutableLiveData.observe(this, item -> {
+            ParticipantDto participantDto = mSearchViewModel.
+                    getParticipantArrayList().get(item.getParticipantNum());
+            participantDto.setChampionIcon(item.getItemBitmap());
         });
     }
 
@@ -117,7 +157,7 @@ public class SearchActivity extends AppCompatActivity {
         mBinding.searchSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                mSearchViewModel.setUserInfo(query);
+                mSearchViewModel.getSummoner(query);
                 return false;
             }
 
@@ -126,8 +166,7 @@ public class SearchActivity extends AppCompatActivity {
                 if (newText.isEmpty()) {
                     mBinding.searchSearchView.setMaxWidth(880);
                     mBinding.searchButton1.setVisibility(View.INVISIBLE);
-                }
-                else {
+                } else {
                     mBinding.searchSearchView.setMaxWidth(750);
                     mBinding.searchButton1.setVisibility(View.VISIBLE);
                 }
@@ -161,7 +200,7 @@ public class SearchActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        switch (item.getItemId()){
+        switch (item.getItemId()) {
             case android.R.id.home: {
                 finish();
                 return true;

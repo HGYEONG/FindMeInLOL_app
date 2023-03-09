@@ -1,18 +1,17 @@
 package com.example.findmeinlol.model;
 
-import com.example.findmeinlol.APIListener;
-import com.example.findmeinlol.R;
-import com.example.findmeinlol.RiotAPIRepository;
-import com.example.findmeinlol.RiotImageAPIRepository;
-import com.example.findmeinlol.model.data.User;
+import com.example.findmeinlol.model.data.ParticipantDto;
+import com.example.findmeinlol.model.data.SummonerDto;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 
 public class SearchModel {
     private static SearchModel mSearchModel;
-    private static ArrayList<User> userList = new ArrayList<>();
-    private static User mUser = new User();
+    private ArrayList<SummonerDto> summonerDtoList = new ArrayList<>();
+
+
+    private SummonerDto mSummonerDto = new SummonerDto();
+    private ParticipantDto participantDto = new ParticipantDto();
 
     public static SearchModel getInstance() {
         if (mSearchModel == null) {
@@ -21,46 +20,64 @@ public class SearchModel {
         return mSearchModel;
     }
 
-    public void addUser(User user) {
-        userList.add(user);
+    public void setSummoner(SummonerDto summonerDto) {
+        mSummonerDto = summonerDto;
+    }
+
+    public void addUser() {
+        summonerDtoList.add(mSummonerDto);
     }
 
     public boolean isName(String name) {
-        for (User user : userList) {
-            if (user.getName().equals(name)) {
+        for (SummonerDto summonerDto : summonerDtoList) {
+            if (summonerDto.getName().equals(name)) {
                 return true;
             }
         }
         return false;
     }
 
-    public User getUser(int idx) {
-        return userList.get(idx);
+    public SummonerDto getSummoner() { return mSummonerDto; }
+
+    public SummonerDto getSummoner(int idx) {
+        return summonerDtoList.get(idx);
     }
 
     public int getSize() {
-        return userList.size();
+        return summonerDtoList.size();
+    }
+
+    public String getPuuid() {
+        return mSummonerDto.getPuuId();
     }
 
     public void clearList() {
-        userList.clear();
+        summonerDtoList.clear();
     }
 
-    public ArrayList<User> getUserList() {
-        return userList;
+    public ArrayList<SummonerDto> getUserList() {
+        return summonerDtoList;
     }
 
     public void deleteUser(int idx) {
-        userList.remove(idx);
+        summonerDtoList.remove(idx);
     }
 
-    public void setUserInfo(String name, APIListener apiListener) {
-        RiotAPIRepository riotAPIRepository = new RiotAPIRepository(apiListener);
-        riotAPIRepository.getUserInfo(name);
+    public SummonerDto getSummonerDto() { return mSummonerDto; }
+
+    public void addParticipantDtoArrayList(ParticipantDto participantDto) {
+        mSummonerDto.addParticipantDtoArrayList(participantDto);
     }
 
-    public void getProfileIconBitmap(int profileIconId, APIListener apiListener) {
-        RiotImageAPIRepository riotImageAPIRepository = new RiotImageAPIRepository(apiListener);
-        riotImageAPIRepository.getProfileIconImage(profileIconId);
+    public ParticipantDto getParticipantDto() {
+        return this.participantDto;
+    }
+
+    public void setParticipantDto(ParticipantDto participantDto) {
+        this.participantDto = participantDto;
+    }
+
+    public ArrayList<ParticipantDto> getParticipantDtoArrayList() {
+        return mSummonerDto.getParticipantDtoArrayList();
     }
 }

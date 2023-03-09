@@ -1,78 +1,78 @@
 package com.example.findmeinlol.viewmodel;
 
-import android.graphics.Bitmap;
-
-import androidx.databinding.Bindable;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-import com.example.findmeinlol.APIListener;
-import com.example.findmeinlol.model.data.User;
+import com.example.findmeinlol.RiotAPIRepository;
+import com.example.findmeinlol.model.Item;
+import com.example.findmeinlol.model.data.ParticipantDto;
+import com.example.findmeinlol.model.data.SummonerDto;
 import com.example.findmeinlol.model.SearchModel;
 import com.example.findmeinlol.viewmodel.adapter.CallBackListener;
 
 import java.util.ArrayList;
 
 public class SearchViewModel extends ViewModel {
-    private SearchModel searchModel = new SearchModel();
-    public MutableLiveData<ArrayList<User>> liveData = new MutableLiveData<>();
-    private User mUser;
-    private CallBackListener mCallBackListener;
+    private SearchModel mSearchModel = SearchModel.getInstance();
+    private CallBackListener callBackListener;
+
+    public MutableLiveData<ArrayList<SummonerDto>> liveData = new MutableLiveData<>();
+    public MutableLiveData<ParticipantDto> participantDtoMutableLiveData;
+    public MutableLiveData<Integer> integerMutableLiveData;
+    public MutableLiveData<SummonerDto> summonerDtoMutableLiveData;
+    public MutableLiveData<Item> itemIconMutableLiveData;
+    public MutableLiveData<Item> championIconMutableLiveData;
+
+    private RiotAPIRepository mRiotApiRepository = RiotAPIRepository.getInstance();
 
     public SearchViewModel() {
-        liveData.setValue(searchModel.getUserList());
+        liveData.setValue(mSearchModel.getUserList());
+        this.participantDtoMutableLiveData = mRiotApiRepository.participantDtoMutableLiveData;
+        this.integerMutableLiveData = mRiotApiRepository.integerMutableLiveData;
+        this.summonerDtoMutableLiveData = mRiotApiRepository.summonerDtoMutableLiveData;
+        this.itemIconMutableLiveData = mRiotApiRepository.itemIconMutableLiveData;
+        this.championIconMutableLiveData = mRiotApiRepository.championIconMutableLiveData;
     }
 
-    private void addUser(User user) {
-        searchModel.addUser(user);
-        liveData.setValue(searchModel.getUserList());
+    public void setCallBackListener(CallBackListener callBackListener) {
+        this.callBackListener = callBackListener;
+    }
+
+    public void addUser() {
+        mSearchModel.addUser();
     }
 
     public SearchModel getSearchModel() {
-        return searchModel;
-    }
-
-    public boolean isName(String name) {
-        return searchModel.isName(name);
+        return mSearchModel;
     }
 
     public void clearList() {
-        searchModel.clearList();
-        liveData.setValue(searchModel.getUserList());
+        mSearchModel.clearList();
+        liveData.setValue(mSearchModel.getUserList());
     }
 
     public void deleteUser(int idx) {
-        searchModel.deleteUser(idx);
-        liveData.setValue(searchModel.getUserList());
+        mSearchModel.deleteUser(idx);
+        liveData.setValue(mSearchModel.getUserList());
     }
 
-    public void setUserInfo(String name) {
-        searchModel.setUserInfo(name, mApiListener);
+    public void getSummoner(String name) {
+        mRiotApiRepository.getSummoner(name);
     }
 
-    private APIListener mApiListener = new APIListener() {
-        @Override
-        public void setUser(User user) {
-            mUser = user;
-            if (user != null) {
-                if (!isName(mUser.getName())) {
-                    searchModel.getProfileIconBitmap(mUser.getProfileIconId(), mApiListener);
-                    addUser(mUser);
-                }
-            }
-            else {
-                mCallBackListener.userInfoUpdated(false, mUser);
-            }
-        }
+    public void addParticipantDto(ParticipantDto participantDto) {
+        mSearchModel.addParticipantDtoArrayList(participantDto);
+    }
 
-        @Override
-        public void setProfileIcon(Bitmap bitmap) {
-            mUser.setProfileIcon(bitmap);
-            mCallBackListener.userInfoUpdated(true, mUser);
-        }
-    };
+    public void setParticipantDto(ParticipantDto participantDto) {
+        mSearchModel.setParticipantDto(participantDto);
+    }
 
-    public void setCallBackListener(CallBackListener callBackListener) {
-        this.mCallBackListener = callBackListener;
+    public ParticipantDto getParticipantDto() {
+        return mSearchModel.getParticipantDto();
+    }
+
+    public ArrayList<ParticipantDto> getParticipantArrayList() {
+        return mSearchModel.getParticipantDtoArrayList();
     }
 }

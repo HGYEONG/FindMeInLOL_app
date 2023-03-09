@@ -1,10 +1,11 @@
 package com.example.findmeinlol.viewmodel.adapter;
 
-import com.example.findmeinlol.model.data.User;
+import com.example.findmeinlol.model.data.SummonerDto;
 
-public interface CallBackListener {
+public interface CallBackListener<T> {
     void itemClicked(int pos);
     void deleteBtnClicked(int pos);
     void favoriteBtnClicked(int pos, boolean isChecked);
-    void userInfoUpdated(boolean need, User user);
+    void onUpdated(T response);
+    void onFinished();
 }

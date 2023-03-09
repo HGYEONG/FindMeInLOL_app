@@ -2,7 +2,7 @@ package com.example.findmeinlol.model.data;
 
 import com.google.gson.annotations.SerializedName;
 
-public class LeagueEntry {
+public class LeagueEntryDTO {
     @SerializedName("tier")
     private String tier;
 

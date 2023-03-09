@@ -10,10 +10,14 @@ import android.util.Log;
 import com.google.gson.annotations.SerializedName;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 
-public class User {
+public class SummonerDto {
     @SerializedName("id")
     private String id;
+
+    @SerializedName("puuid")
+    private String puuId;
 
     @SerializedName("name")
     private String name;
@@ -37,8 +41,14 @@ public class User {
 
     private String tierIconId;
 
+    private ArrayList<ParticipantDto> participantDtoArrayList = new ArrayList<>();
+
     public String getId() {
         return id;
+    }
+
+    public String getPuuId() {
+        return puuId;
     }
 
     public String getName() {
@@ -74,4 +84,12 @@ public class User {
     public void setTierIconId(String tierIconId) { this.tierIconId = tierIconId; }
 
     public String getTierIconId() { return tierIconId; }
+
+    public void addParticipantDtoArrayList(ParticipantDto participantDto) {
+        participantDtoArrayList.add(participantDto);
+    }
+
+    public ArrayList<ParticipantDto> getParticipantDtoArrayList() {
+        return this.participantDtoArrayList;
+    }
 }
