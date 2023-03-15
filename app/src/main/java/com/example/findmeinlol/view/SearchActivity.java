@@ -25,7 +25,9 @@ import com.example.findmeinlol.viewmodel.adapter.CallBackListener;
 import com.example.findmeinlol.viewmodel.adapter.SearchViewRecyclerAdapter;
 import com.google.gson.Gson;
 
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 
 public class SearchActivity extends AppCompatActivity {
 
@@ -64,7 +66,10 @@ public class SearchActivity extends AppCompatActivity {
         @Override
         public void onFinished() {
             SummonerDto summonerDto = mSearchViewModel.getSearchModel().getSummoner();
-            Log.d("*****", "onFinished!");
+
+            // 비동기화 처리로 인해 값이 순서대로 안 와서 정렬
+            Collections.sort(summonerDto.getParticipantDtoArrayList());
+
             if (summonerDto != null) {
                 if (mSearchViewModel.getSearchModel().isName(summonerDto.getName())) return;
                 mSearchViewModel.addUser();
@@ -136,8 +141,18 @@ public class SearchActivity extends AppCompatActivity {
 
         mSearchViewModel.itemIconMutableLiveData.observe(this, item -> {
             count++;
-            ParticipantDto participantDto = mSearchViewModel.
-                    getParticipantArrayList().get(item.getParticipantNum());
+            String matchId = item.getMatchId();
+            ArrayList<ParticipantDto> participantDtoArrayList
+                    = mSearchViewModel.getParticipantArrayList();
+            ParticipantDto participantDto = null;
+
+            for (int i= 0; i < participantDtoArrayList.size(); i++) {
+                if (participantDtoArrayList.get(i).getMatchId() == matchId) {
+                    participantDto = participantDtoArrayList.get(i);
+                    break;
+                }
+            }
+
             participantDto.getItemIcons()[item.getItemNum()] = item.getItemBitmap();
 
             if(count == mSearchViewModel.integerMutableLiveData.getValue() * 7) {
@@ -147,9 +162,49 @@ public class SearchActivity extends AppCompatActivity {
         });
 
         mSearchViewModel.championIconMutableLiveData.observe(this, item -> {
-            ParticipantDto participantDto = mSearchViewModel.
-                    getParticipantArrayList().get(item.getParticipantNum());
+            String matchId = item.getMatchId();
+            ArrayList<ParticipantDto> participantDtoArrayList
+                    = mSearchViewModel.getParticipantArrayList();
+            ParticipantDto participantDto = null;
+
+            for (int i= 0; i < participantDtoArrayList.size(); i++) {
+                if (participantDtoArrayList.get(i).getMatchId() == matchId) {
+                    participantDto = participantDtoArrayList.get(i);
+                    break;
+                }
+            }
             participantDto.setChampionIcon(item.getItemBitmap());
+        });
+
+        mSearchViewModel.spellIconMutableLiveData.observe(this, item -> {
+            String matchId = item.getMatchId();
+            ArrayList<ParticipantDto> participantDtoArrayList
+                    = mSearchViewModel.getParticipantArrayList();
+            ParticipantDto participantDto = null;
+
+            for (int i= 0; i < participantDtoArrayList.size(); i++) {
+                if (participantDtoArrayList.get(i).getMatchId() == matchId) {
+                    participantDto = participantDtoArrayList.get(i);
+                    break;
+                }
+            }
+            participantDto.getSpellIcons()[item.getItemNum()] = item.getItemBitmap();
+        });
+
+        mSearchViewModel.runeIconMutableLiveData.observe(this, item -> {
+            String matchId = item.getMatchId();
+            ArrayList<ParticipantDto> participantDtoArrayList
+                    = mSearchViewModel.getParticipantArrayList();
+            ParticipantDto participantDto = null;
+
+            for (int i= 0; i < participantDtoArrayList.size(); i++) {
+                if (participantDtoArrayList.get(i).getMatchId() == matchId) {
+                    participantDto = participantDtoArrayList.get(i);
+                    break;
+                }
+            }
+            Log.d("*****", "observe!");
+            participantDto.getRuneIcons()[item.getItemNum()] = item.getItemBitmap();
         });
     }
 

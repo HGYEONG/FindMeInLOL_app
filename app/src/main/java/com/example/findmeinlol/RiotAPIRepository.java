@@ -7,17 +7,22 @@ import android.util.Log;
 import androidx.lifecycle.MutableLiveData;
 
 import com.example.findmeinlol.model.Item;
-import com.example.findmeinlol.model.SearchModel;
 import com.example.findmeinlol.model.data.InfoDto;
 import com.example.findmeinlol.model.data.LeagueEntryDTO;
 import com.example.findmeinlol.model.data.MatchDto;
 import com.example.findmeinlol.model.data.ParticipantDto;
+import com.example.findmeinlol.model.data.PerksDto;
 import com.example.findmeinlol.model.data.SummonerDto;
+import com.google.gson.Gson;
 
-import java.lang.reflect.Array;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
+import java.util.Iterator;
+import java.util.concurrent.TimeUnit;
 
 import okhttp3.ResponseBody;
 import retrofit2.Call;
@@ -37,14 +42,28 @@ public class RiotAPIRepository {
             "https://ddragon.leagueoflegends.com/cdn/13.3.1/img/champion/";
     static final String RIOT_ITEM_IMAGE_URL =
             "https://ddragon.leagueoflegends.com/cdn/13.3.1/img/item/";
+    static final String RIOT_SPELL_IMAGE_URL =
+            "https://ddragon.leagueoflegends.com/cdn/13.3.1/img/spell/";
+    static final String RIOT_SPELL_JSON_URL =
+            "https://ddragon.leagueoflegends.com/cdn/13.5.1/data/en_US/";
+    static final String RIOT_RUNES_JSON_URL =
+            "https://ddragon.leagueoflegends.com/cdn/13.5.1/data/en_US/";
+    static final String RIOT_RUNES_IMAGE_URL =
+            "https://ddragon.leagueoflegends.com/cdn/img/";
 
     public MutableLiveData<SummonerDto> summonerDtoMutableLiveData = new MutableLiveData<>();
     public MutableLiveData<ParticipantDto> participantDtoMutableLiveData = new MutableLiveData<>();
     public MutableLiveData<Integer> integerMutableLiveData = new MutableLiveData<>();
     public MutableLiveData<Item> championIconMutableLiveData = new MutableLiveData<>();
     public MutableLiveData<Item> itemIconMutableLiveData = new MutableLiveData<>();
-    private ArrayList<Bitmap> bitmapArrayList = new ArrayList<>();
+    public MutableLiveData<Item> spellIconMutableLiveData = new MutableLiveData<>();
+    public MutableLiveData<Item> runeIconMutableLiveData = new MutableLiveData<>();
     private ArrayList<Integer> itemIds = new ArrayList<>();
+    private ArrayList<Integer> spellIds = new ArrayList<>();
+    private ArrayList<Integer> runeIds = new ArrayList<>();
+    private HashMap<String, String> spellNames = new HashMap<>();
+    private HashMap<Integer, String> runeNames = new HashMap<>();
+
 
     public static RiotAPIRepository getInstance() {
         if (mRetrofitRepository == null) {
@@ -83,6 +102,61 @@ public class RiotAPIRepository {
             .build()
             .create(RiotAPI.class);
 
+    public RiotAPI mRiotSpellImgApi = new Retrofit.Builder()
+            .baseUrl(RIOT_SPELL_IMAGE_URL)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(RiotAPI.class);
+
+    public RiotAPI mRiotSpellJSonApi = new Retrofit.Builder()
+            .baseUrl(RIOT_SPELL_JSON_URL)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(RiotAPI.class);
+
+    public RiotAPI mRiotRunesJsonApi = new Retrofit.Builder()
+            .baseUrl(RIOT_RUNES_JSON_URL)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(RiotAPI.class);
+
+    public RiotAPI mRiotRuneImgApi = new Retrofit.Builder()
+            .baseUrl(RIOT_RUNES_IMAGE_URL)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(RiotAPI.class);
+
+    private interface ApiListener {
+        void onUpdated();
+    }
+
+    private ApiListener apiListener = new ApiListener() {
+        int cnt = 0;
+        @Override
+        public void onUpdated() {
+            ParticipantDto participantDto = participantDtoMutableLiveData.getValue();
+
+            getChampionImage(participantDto.getChampionName(), participantDto.getMatchId());
+            for (int i = 0; i < 7 ; i++) {
+                getItemImage(itemIds.get(i), participantDto.getMatchId(), i);
+            }
+            for (int i = 0; i < 2; i++) {
+                getSpellImage(spellIds.get(i), participantDto.getMatchId(), i);
+            }
+
+            for (int i = 0; i < 2; i++) {
+                getRuneImage(runeIds.get(i), participantDto.getMatchId(), i);
+            }
+
+            itemIds.clear();
+            spellIds.clear();
+            runeIds.clear();
+            cnt++;
+
+            if (cnt == integerMutableLiveData.getValue()) cnt = 0;
+        }
+    };
+
     public void getSummoner(String name) {
         mRiotApi.getUserInfo(name, BuildConfig.riot_api_key).enqueue(new Callback<SummonerDto>() {
             @Override
@@ -91,6 +165,8 @@ public class RiotAPIRepository {
                     summonerDtoMutableLiveData.setValue(response.body());
                     getLeagueEntry();
                     getMatch(response.body().getPuuId());
+                    getSpellJson();
+                    getPerksJson();
                 } else {
                     summonerDtoMutableLiveData.setValue(null);
                 }
@@ -105,6 +181,7 @@ public class RiotAPIRepository {
 
     private void getLeagueEntry() {
         SummonerDto summonerDto = summonerDtoMutableLiveData.getValue();
+        LeagueEntryDTO leagueEntryDTO = new LeagueEntryDTO();
         String id = summonerDto.getId();
 
         mRiotApi.getLeagueEntry(id, BuildConfig.riot_api_key).enqueue(
@@ -116,16 +193,17 @@ public class RiotAPIRepository {
                         if (response.isSuccessful()) {
                             if (response.body().isEmpty()) {
                                 path += getResourceId("UNRANK");
-                                summonerDto.setTier("UNRANK");
-                                summonerDto.setQueueType("");
-                                summonerDto.setRank("");
+                                leagueEntryDTO.setTier("UNRANK");
+                                leagueEntryDTO.setQueueType("");
+                                leagueEntryDTO.setRank("");
                             } else {
                                 path += getResourceId(response.body().get(0).getTier());
-                                summonerDto.setTier(response.body().get(0).getTier());
-                                summonerDto.setQueueType(response.body().get(0).getQueueType());
-                                summonerDto.setRank(response.body().get(0).getRank());
+                                leagueEntryDTO.setTier(response.body().get(0).getTier());
+                                leagueEntryDTO.setQueueType(response.body().get(0).getQueueType());
+                                leagueEntryDTO.setRank(response.body().get(0).getRank());
                             }
                             summonerDto.setTierIconId(path);
+                            summonerDto.setLeagueEntryDTO(leagueEntryDTO);
                             summonerDtoMutableLiveData.setValue(summonerDto);
                             getProfileIconImage();
                         }
@@ -170,11 +248,9 @@ public class RiotAPIRepository {
                     public void onResponse(Call<ArrayList<String>> call,
                                            Response<ArrayList<String>> response) {
                         if (response.isSuccessful()) {
-                            int idx = 0;
                             integerMutableLiveData.setValue(response.body().size());
                             for (String matchId : response.body()) {
-                                getMatchInfo(matchId, idx);
-                                idx++;
+                                getMatchInfo(matchId);
                             }
                         }
                     }
@@ -186,7 +262,21 @@ public class RiotAPIRepository {
                 });
     }
 
-    public void getMatchInfo(String matchId, int idx) {
+    private String timeFormat(Long milliseconds) {
+        String result = "";
+
+        long hours = TimeUnit.MILLISECONDS.toHours(milliseconds);
+        long minutes = TimeUnit.MILLISECONDS.toMinutes(milliseconds);
+        long seconds = TimeUnit.MILLISECONDS.toSeconds(milliseconds);
+
+        result = Long.toString(hours);
+        result += Long.toString(minutes);
+        result += Long.toString(seconds);
+
+        return result;
+    }
+
+    public void getMatchInfo(String matchId) {
         mRiotMatchApi.getMatchInfo(matchId, BuildConfig.riot_api_key).enqueue(new Callback<MatchDto>() {
             @Override
             public void onResponse(Call<MatchDto> call, Response<MatchDto> response) {
@@ -203,6 +293,15 @@ public class RiotAPIRepository {
                     }
 
                     ParticipantDto participantDto = infoDto.getParticipantDto().get(pos);
+                    participantDto.setMatchId(matchId);
+
+                    PerksDto perksDto = participantDto.getPerks();
+                    PerksDto.PerkStyleDto mainPerkStyleDto = perksDto.getPerksStyleDto(0);
+                    runeIds.add(mainPerkStyleDto.getSelections().get(0).getPerk());
+                    PerksDto.PerkStyleDto subPerkStyleDto = perksDto.getPerksStyleDto(1);
+                    runeIds.add(subPerkStyleDto.getStyle());
+                    participantDto.setRuneIds(runeIds);
+
                     participantDtoMutableLiveData.setValue(participantDto);
 
                     itemIds.add(participantDto.getItem0());
@@ -212,6 +311,9 @@ public class RiotAPIRepository {
                     itemIds.add(participantDto.getItem4());
                     itemIds.add(participantDto.getItem5());
                     itemIds.add(participantDto.getItem6());
+
+                    spellIds.add(participantDto.getSummoner1Id());
+                    spellIds.add(participantDto.getSummoner2Id());
 
                     apiListener.onUpdated();
                 }
@@ -243,14 +345,14 @@ public class RiotAPIRepository {
         });
     }
 
-    private void getChampionImage(String name, int idx) {
+    private void getChampionImage(String name, String matchId) {
         String path = name + ".png";
 
         mRiotChampionImgApi.getImage(path).enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 Item item = new Item();
-                item.setParticipantNum(idx);
+                item.setMatchId(matchId);
 
                 Bitmap bitmap = BitmapFactory.decodeStream(response.body().byteStream());
                 item.setItemBitmap(bitmap);
@@ -265,14 +367,14 @@ public class RiotAPIRepository {
         });
     }
 
-    private void getItemImage(int imgId, int participantNum, int itemNum) {
+    private void getItemImage(int imgId, String matchId, int itemNum) {
         String path = imgId + ".png";
 
         mRiotItemImgApi.getImage(path).enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 Item item = new Item();
-                item.setParticipantNum(participantNum);
+                item.setMatchId(matchId);
                 item.setItemNum(itemNum);
 
                 if (response.body() != null) {
@@ -292,24 +394,124 @@ public class RiotAPIRepository {
         });
     }
 
-    private interface ApiListener {
-        void onUpdated();
+    private void getSpellImage(int imgId, String matchId, int spellNum) {
+        String spellName = spellNames.get(Integer.toString(imgId));
+        String path = spellName + ".png";
+
+        mRiotSpellImgApi.getImage(path).enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                Item item = new Item();
+                item.setMatchId(matchId);
+                item.setItemNum(spellNum);
+                if (response.body() != null) {
+                    Bitmap bitmap = BitmapFactory.decodeStream(response.body().byteStream());
+                    item.setItemBitmap(bitmap);
+                }
+                else {
+                    item.setItemBitmap(null);
+                }
+                spellIconMutableLiveData.setValue(item);
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                t.printStackTrace();
+            }
+        });
     }
 
-    private ApiListener apiListener = new ApiListener() {
-        int cnt = 0;
-        @Override
-        public void onUpdated() {
-            ParticipantDto participantDto = participantDtoMutableLiveData.getValue();
+    private void getSpellJson() {
+        ArrayList<String> nameKeys = new ArrayList<>();
 
-            getChampionImage(participantDto.getChampionName(), cnt);
-            for(int j = 0; j < 7 ; j++) {
-                getItemImage(itemIds.get(j), cnt, j);
+        mRiotSpellJSonApi.getSpellJson().enqueue(new Callback<Object>() {
+            @Override
+            public void onResponse(Call<Object> call, Response<Object> response) {
+                String json = new Gson().toJson(response.body());
+                try {
+                    JSONObject jsonObject = new JSONObject(json);
+                    jsonObject = jsonObject.getJSONObject("data");
+                    Iterator iterator = jsonObject.keys();
+
+                    while(iterator.hasNext()) {
+                        String name = iterator.next().toString();
+                        nameKeys.add(name);
+                    }
+
+                    for (int i = 0; i < nameKeys.size(); i++) {
+                        JSONObject spell = jsonObject.getJSONObject(nameKeys.get(i));
+                        String key = spell.getString("key");
+                        spellNames.put(key, nameKeys.get(i));
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
             }
-            itemIds.clear();
-            cnt++;
 
-            if (cnt == integerMutableLiveData.getValue()) cnt = 0;
-        }
-    };
+            @Override
+            public void onFailure(Call<Object> call, Throwable t) {
+
+            }
+        });
+    }
+
+    private void getPerksJson() {
+        mRiotRunesJsonApi.getRuneJson().enqueue(new Callback<Object>() {
+            @Override
+            public void onResponse(Call<Object> call, Response<Object> response) {
+                String json = new Gson().toJson(response.body());
+                try {
+                    JSONArray jsonArray = new JSONArray(json);
+                    for (int i = 0; i < jsonArray.length(); i++) {
+                        JSONObject mainRune = jsonArray.getJSONObject(i);
+                        runeNames.put(mainRune.getInt("id"),
+                                mainRune.getString("icon"));
+                        JSONArray slots = mainRune.getJSONArray("slots");
+                        for (int j = 0; j < slots.length(); j++) {
+                            JSONObject runes = slots.getJSONObject(j);
+                            JSONArray rune = runes.getJSONArray("runes");
+                            for (int k = 0; k < rune.length(); k++) {
+                                JSONObject jsonObject = rune.getJSONObject(k);
+                                runeNames.put(jsonObject.getInt("id"),
+                                        jsonObject.getString("icon"));
+                            }
+                        }
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Object> call, Throwable t) {
+
+            }
+        });
+    }
+
+    private void getRuneImage(int imgId, String matchId, int spellNum) {
+        String path = runeNames.get(imgId);
+
+        mRiotRuneImgApi.getImage(path).enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                Item item = new Item();
+                item.setMatchId(matchId);
+                item.setItemNum(spellNum);
+                if (response.body() != null) {
+                    Bitmap bitmap = BitmapFactory.decodeStream(response.body().byteStream());
+                    item.setItemBitmap(bitmap);
+                }
+                else {
+                    item.setItemBitmap(null);
+                }
+                runeIconMutableLiveData.setValue(item);
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                t.printStackTrace();
+            }
+        });
+    }
 }

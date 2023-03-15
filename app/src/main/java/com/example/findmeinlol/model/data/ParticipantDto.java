@@ -2,13 +2,11 @@ package com.example.findmeinlol.model.data;
 
 import android.graphics.Bitmap;
 
-import com.example.findmeinlol.model.Item;
 import com.google.gson.annotations.SerializedName;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
-public class ParticipantDto {
+public class ParticipantDto implements Comparable<ParticipantDto> {
     @SerializedName("win")
     boolean win;
 
@@ -20,9 +18,6 @@ public class ParticipantDto {
 
     @SerializedName("assists")
     int assists;
-
-    @SerializedName("timePlayed")
-    int timePlayed;
 
     @SerializedName("championName")
     String championName;
@@ -45,17 +40,31 @@ public class ParticipantDto {
     @SerializedName("item6")
     int item6;
 
+    @SerializedName("summoner1Id")
+    int summoner1Id;
+    @SerializedName("summoner2Id")
+    int summoner2Id;
+
+    @SerializedName("perks")
+    PerksDto perks;
+
+    private String matchId;
+
     private Bitmap[] itemIcons = new Bitmap[7]; // item 번호, bitmap
 
     private Bitmap championIcon;
+
+    private Bitmap[] spellIcons = new Bitmap[2];
+
+    private Bitmap[] runeIcons = new Bitmap[2];
+
+    private ArrayList<Integer> runeIds;
 
     public int getDeaths() { return this.deaths; }
 
     public int getKills() { return this.kills; }
 
     public int getAssists() { return this.assists; }
-
-    public int getTimePlayed() { return this.timePlayed; }
 
     public boolean getWin() { return this.win; }
 
@@ -97,15 +106,53 @@ public class ParticipantDto {
         return this.item6;
     }
 
-    public void addItemIcons(int idx, Bitmap bitmap) {
-        itemIcons[idx] = bitmap;
-    }
-
     public Bitmap[] getItemIcons() {
         return this.itemIcons;
     }
 
     public String getSummonerName() {
         return this.summonerName;
+    }
+
+    public int getSummoner1Id() {
+        return this.summoner1Id;
+    }
+    public int getSummoner2Id() {
+        return this.summoner2Id;
+    }
+
+    public Bitmap[] getSpellIcons() { return this.spellIcons; }
+
+    public void setMatchId(String matchId) {
+        this.matchId = matchId;
+    }
+
+    public String getMatchId() {
+        return this.matchId;
+    }
+
+    public PerksDto getPerks() { return this.perks; }
+
+    public void setRuneIds(ArrayList<Integer> runeIds) {
+        this.runeIds = runeIds;
+    }
+
+    public ArrayList<Integer> getRuneIds() {
+        return this.runeIds;
+    }
+
+    public Bitmap[] getRuneIcons() { return this.runeIcons; }
+
+    @Override
+    public int compareTo(ParticipantDto o) {
+        if(o.matchId.compareTo(matchId) > 0) {
+            return 1;
+        }
+        else if (o.matchId.compareTo(matchId) < 0) {
+            return -1;
+        }
+        else {
+            return 0;
+        }
     }
 }

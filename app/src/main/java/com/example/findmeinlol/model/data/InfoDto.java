@@ -6,7 +6,17 @@ import java.util.ArrayList;
 
 public class InfoDto {
     @SerializedName("participants")
-    ArrayList<ParticipantDto> participantDto;
+    private ArrayList<ParticipantDto> participantDto;
+
+    @SerializedName("gameStartTimeStamp")
+    private long gameStartTimeStamp;
+
+    @SerializedName("gameEndTimeStamp")
+    private long gameEndTimeStamp;
 
     public ArrayList<ParticipantDto> getParticipantDto() { return this.participantDto; }
+
+    public long getTimeStamp() {
+        return this.gameEndTimeStamp - this.gameStartTimeStamp;
+    }
 }

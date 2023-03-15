@@ -15,7 +15,7 @@ public class SearchResultViewModel extends ViewModel {
 
     private void setData() {
         this.name = mSearchResultModel.getSummonerDto().getName();
-        this.rank = mSearchResultModel.getSummonerDto().getTier();
+        this.rank = mSearchResultModel.getSummonerDto().getLeagueEntryDTO().getTier();
     }
     public void setSummonerDto(SummonerDto summonerDto) {
         mSearchResultModel.setSummonerDto(summonerDto);

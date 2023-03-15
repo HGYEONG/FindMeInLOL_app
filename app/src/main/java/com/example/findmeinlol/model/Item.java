@@ -2,16 +2,13 @@ package com.example.findmeinlol.model;
 
 import android.graphics.Bitmap;
 
-import com.example.findmeinlol.model.data.ParticipantDto;
-
 public class Item {
-    private int participantNum;
+    private String matchId;
     private int itemNum;
     private Bitmap itemBitmap;
-    private ParticipantDto participantDto;
 
-    public void setParticipantNum(int num) {
-        this.participantNum = num;
+    public void setMatchId(String matchId) {
+        this.matchId = matchId;
     }
 
     public void setItemNum(int num) {
@@ -22,8 +19,8 @@ public class Item {
         this.itemBitmap = bitmap;
     }
 
-    public int getParticipantNum() {
-        return this.participantNum;
+    public String getMatchId() {
+        return this.matchId;
     }
 
     public int getItemNum() {
@@ -32,14 +29,6 @@ public class Item {
 
     public Bitmap getItemBitmap() {
         return this.itemBitmap;
-    }
-
-    public ParticipantDto getParticipantDto() {
-        return this.participantDto;
-    }
-
-    public void setParticipantDto(ParticipantDto participantDto) {
-        this.participantDto = participantDto;
     }
 }
 

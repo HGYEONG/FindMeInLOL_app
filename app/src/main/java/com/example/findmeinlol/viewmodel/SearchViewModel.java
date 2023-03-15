@@ -22,6 +22,8 @@ public class SearchViewModel extends ViewModel {
     public MutableLiveData<SummonerDto> summonerDtoMutableLiveData;
     public MutableLiveData<Item> itemIconMutableLiveData;
     public MutableLiveData<Item> championIconMutableLiveData;
+    public MutableLiveData<Item> spellIconMutableLiveData;
+    public MutableLiveData<Item> runeIconMutableLiveData;
 
     private RiotAPIRepository mRiotApiRepository = RiotAPIRepository.getInstance();
 
@@ -32,6 +34,8 @@ public class SearchViewModel extends ViewModel {
         this.summonerDtoMutableLiveData = mRiotApiRepository.summonerDtoMutableLiveData;
         this.itemIconMutableLiveData = mRiotApiRepository.itemIconMutableLiveData;
         this.championIconMutableLiveData = mRiotApiRepository.championIconMutableLiveData;
+        this.spellIconMutableLiveData = mRiotApiRepository.spellIconMutableLiveData;
+        this.runeIconMutableLiveData = mRiotApiRepository.runeIconMutableLiveData;
     }
 
     public void setCallBackListener(CallBackListener callBackListener) {

@@ -17,4 +17,16 @@ public class LeagueEntryDTO {
     public String getRank() { return rank; }
 
     public String getQueueType() { return queueType; }
+
+    public void setTier(String tier) {
+        this.tier = tier;
+    }
+
+    public void setRank(String rank) {
+        this.rank = rank;
+    }
+
+    public void setQueueType(String queueType) {
+        this.queueType = queueType;
+    }
 }

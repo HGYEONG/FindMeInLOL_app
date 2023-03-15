@@ -5,11 +5,14 @@ import com.example.findmeinlol.model.data.MatchDto;
 import com.example.findmeinlol.model.data.ParticipantDto;
 import com.example.findmeinlol.model.data.SummonerDto;
 
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.GET;
+import retrofit2.http.POST;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
 
@@ -29,4 +32,10 @@ public interface RiotAPI {
 
     @GET("{imagePath}")
     Call<ResponseBody> getImage(@Path("imagePath") String imagePath);
+
+    @GET("summoner.json")
+    Call<Object> getSpellJson();
+
+    @GET("runesReforged.json")
+    Call<Object> getRuneJson();
 }

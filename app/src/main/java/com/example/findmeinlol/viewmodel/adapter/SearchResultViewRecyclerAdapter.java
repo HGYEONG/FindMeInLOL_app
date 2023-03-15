@@ -2,6 +2,7 @@ package com.example.findmeinlol.viewmodel.adapter;
 
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
@@ -35,44 +36,64 @@ public class SearchResultViewRecyclerAdapter
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         SummonerDto summonerDto = mSearchResultViewModel.getSummonerDto();
         ParticipantDto participantDto = summonerDto.getParticipantDtoArrayList().get(position);
-        Bitmap[] bitmaps = participantDto.getItemIcons();
+        Bitmap[] itemIcons = participantDto.getItemIcons();
+        Bitmap[] spellIcons = participantDto.getSpellIcons();
+        Bitmap[] runeIcons = participantDto.getRuneIcons();
         holder.resultRecyclerviewItemBinding.setParticipant(participantDto);
         holder.resultRecyclerviewItemBinding.resultRecyclerviewChampionImg.
                 setImageBitmap(participantDto.getChampionIcon());
 
-        if (bitmaps[0] != null) {
+        if (itemIcons[0] != null) {
             holder.resultRecyclerviewItemBinding.resultRecyclerviewImgItem0.setImageBitmap(
-                    bitmaps[0]);
+                    itemIcons[0]);
         }
 
-        if (bitmaps[1] != null) {
+        if (itemIcons[1] != null) {
             holder.resultRecyclerviewItemBinding.resultRecyclerviewImgItem1.setImageBitmap(
-                    bitmaps[1]);
+                    itemIcons[1]);
         }
 
-        if (bitmaps[2] != null) {
+        if (itemIcons[2] != null) {
             holder.resultRecyclerviewItemBinding.resultRecyclerviewImgItem2.setImageBitmap(
-                    bitmaps[2]);
+                    itemIcons[2]);
         }
 
-        if (bitmaps[3] != null) {
+        if (itemIcons[3] != null) {
             holder.resultRecyclerviewItemBinding.resultRecyclerviewImgItem3.setImageBitmap(
-                    bitmaps[3]);
+                    itemIcons[3]);
         }
 
-        if (bitmaps[4] != null) {
+        if (itemIcons[4] != null) {
             holder.resultRecyclerviewItemBinding.resultRecyclerviewImgItem4.setImageBitmap(
-                    bitmaps[4]);
+                    itemIcons[4]);
         }
 
-        if (bitmaps[5] != null) {
+        if (itemIcons[5] != null) {
             holder.resultRecyclerviewItemBinding.resultRecyclerviewImgItem5.setImageBitmap(
-                    bitmaps[5]);
+                    itemIcons[5]);
         }
 
-        if (bitmaps[6] != null) {
+        if (itemIcons[6] != null) {
             holder.resultRecyclerviewItemBinding.resultRecyclerviewImgItem6.setImageBitmap(
-                    bitmaps[6]);
+                    itemIcons[6]);
+        }
+
+        if (spellIcons[0] != null) {
+            holder.resultRecyclerviewItemBinding.resultRecyclerviewImgSpell1.setImageBitmap(
+                    spellIcons[0]);
+        }
+        if (spellIcons[1] != null) {
+            holder.resultRecyclerviewItemBinding.resultRecyclerviewImgSpell2.setImageBitmap(
+                    spellIcons[1]);
+        }
+
+        if (runeIcons[0] != null) {
+            holder.resultRecyclerviewItemBinding.resultRecyclerviewImgRune1.setImageBitmap(
+                    runeIcons[0]);
+        }
+        if (runeIcons[1] != null) {
+            holder.resultRecyclerviewItemBinding.resultRecyclerviewImgRune2.setImageBitmap(
+                    runeIcons[1]);
         }
 
         if(participantDto.getWin()) {

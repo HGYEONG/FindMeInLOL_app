@@ -43,69 +43,127 @@
                         android:layout_width="50dp"
                         android:layout_height="50dp" />
 
-                    <TextView
-                        android:id="@+id/result_recyclerview_kda"
+                    <GridLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textSize="15sp"
-                        android:text="@{Integer.toString(participant.kills) + '/' + Integer.toString(participant.deaths) + '/' + Integer.toString(participant.assists)}"/>
+                        android:orientation="horizontal"
+                        android:rowCount="2"
+                        android:columnCount="2"
+                        android:layout_marginLeft="5dp"
+                        android:layout_marginRight="10dp">
+
+                        <ImageView
+                            android:id="@+id/result_recyclerview_img_spell1"
+                            android:layout_width="25dp"
+                            android:layout_height="25dp"
+                            android:layout_marginRight="2dp"
+                            android:background="@color/gray"/>
+                        <ImageView
+                            android:id="@+id/result_recyclerview_img_rune1"
+                            android:layout_width="25dp"
+                            android:layout_height="25dp"
+                            android:background="@android:color/transparent"/>
+                        <ImageView
+                            android:id="@+id/result_recyclerview_img_spell2"
+                            android:layout_width="25dp"
+                            android:layout_height="25dp"
+                            android:layout_marginRight="2dp"
+                            android:layout_marginTop="2dp"
+                            android:background="@color/gray"/>
+                        <ImageView
+                            android:id="@+id/result_recyclerview_img_rune2"
+                            android:layout_width="25dp"
+                            android:layout_height="25dp"
+                            android:layout_marginTop="2dp"
+                            android:background="@android:color/transparent"/>
+
+                    </GridLayout>
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+                        <TextView
+                            android:id="@+id/result_recyclerview_kill"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textSize="20sp"
+                            android:text="@{Integer.toString(participant.kills) + '/'}"/>
+                        <TextView
+                            android:id="@+id/result_recyclerview_death"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textSize="20sp"
+                            android:textColor="@android:color/holo_red_light"
+                            android:text="@{Integer.toString(participant.deaths)}"/>
+                        <TextView
+                            android:id="@+id/result_recyclerview_assist"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textSize="20sp"
+                            android:text="@{'/' + Integer.toString(participant.assists)}"/>
+
+                    </LinearLayout>
+
 
                 </LinearLayout>
 
-                <LinearLayout
+                <GridLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
+                    android:rowCount="1"
+                    android:columnCount="7"
                     android:layout_marginTop="10dp">
 
                     <ImageView
                         android:id="@+id/result_recyclerview_img_item0"
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:layout_marginRight="5dp"
-                        android:src="@drawable/delete_icon"/>
+                        android:layout_width="25dp"
+                        android:layout_height="25dp"
+                        android:layout_marginRight="2dp"
+                        android:background="@color/gray"/>
 
                     <ImageView
                         android:id="@+id/result_recyclerview_img_item1"
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:layout_marginRight="5dp"
-                        android:src="@drawable/delete_icon"/>
+                        android:layout_width="25dp"
+                        android:layout_height="25dp"
+                        android:layout_marginRight="2dp"
+                        android:background="@color/gray"/>
 
                     <ImageView
                         android:id="@+id/result_recyclerview_img_item2"
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:layout_marginRight="5dp"
-                        android:src="@drawable/delete_icon"/>
+                        android:layout_width="25dp"
+                        android:layout_height="25dp"
+                        android:layout_marginRight="2dp"
+                        android:background="@color/gray"/>
 
                     <ImageView
                         android:id="@+id/result_recyclerview_img_item3"
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:layout_marginRight="5dp"
-                        android:src="@drawable/delete_icon"/>
+                        android:layout_width="25dp"
+                        android:layout_height="25dp"
+                        android:layout_marginRight="2dp"
+                        android:background="@color/gray"/>
 
                     <ImageView
                         android:id="@+id/result_recyclerview_img_item4"
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:layout_marginRight="5dp"
-                        android:src="@drawable/delete_icon"/>
+                        android:layout_width="25dp"
+                        android:layout_height="25dp"
+                        android:layout_marginRight="2dp"
+                        android:background="@color/gray"/>
 
                     <ImageView
                         android:id="@+id/result_recyclerview_img_item5"
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:layout_marginRight="5dp"
-                        android:src="@drawable/delete_icon"/>
+                        android:layout_width="25dp"
+                        android:layout_height="25dp"
+                        android:layout_marginRight="2dp"
+                        android:background="@color/gray"/>
 
                     <ImageView
                         android:id="@+id/result_recyclerview_img_item6"
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:src="@drawable/delete_icon"/>
-                </LinearLayout>
+                        android:layout_width="25dp"
+                        android:layout_height="25dp"
+                        android:background="@color/gray"/>
+                </GridLayout>
 
             </LinearLayout>
 

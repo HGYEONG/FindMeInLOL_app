@@ -28,14 +28,7 @@ public class SummonerDto {
     @SerializedName("summonerLevel")
     private long level;
 
-    @SerializedName("tier")
-    private String tier;
-
-    @SerializedName("rank")
-    private String rank;
-
-    @SerializedName("queueType")
-    private String queueType;
+    private LeagueEntryDTO leagueEntryDTO;
 
     private Bitmap profileIcon;
 
@@ -69,18 +62,6 @@ public class SummonerDto {
         return profileIcon;
     }
 
-    public String getTier() { return tier; }
-
-    public String getRank() { return rank; }
-
-    public String getQueueType() { return queueType; }
-
-    public void setTier(String tier) { this.tier = tier; }
-
-    public void setRank(String rank) { this.rank = rank; }
-
-    public void setQueueType(String queueType) { this.queueType = queueType; }
-
     public void setTierIconId(String tierIconId) { this.tierIconId = tierIconId; }
 
     public String getTierIconId() { return tierIconId; }
@@ -91,5 +72,13 @@ public class SummonerDto {
 
     public ArrayList<ParticipantDto> getParticipantDtoArrayList() {
         return this.participantDtoArrayList;
+    }
+
+    public void setLeagueEntryDTO(LeagueEntryDTO leagueEntryDTO) {
+        this.leagueEntryDTO = leagueEntryDTO;
+    }
+
+    public LeagueEntryDTO getLeagueEntryDTO() {
+        return this.leagueEntryDTO;
     }
 }
