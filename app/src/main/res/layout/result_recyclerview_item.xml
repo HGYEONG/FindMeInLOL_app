@@ -4,7 +4,7 @@
     <data>
         <variable
             name="participant"
-            type="com.example.findmeinlol.model.data.ParticipantDto" />
+            type="com.example.findmeinlol.model.data.Participant" />
     </data>
     <LinearLayout
         android:layout_width="match_parent"
@@ -88,20 +88,20 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:textSize="20sp"
-                            android:text="@{Integer.toString(participant.kills) + '/'}"/>
+                            android:text="@{Integer.toString(participant.ParticipantDto.kills) + '/'}"/>
                         <TextView
                             android:id="@+id/result_recyclerview_death"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:textSize="20sp"
                             android:textColor="@android:color/holo_red_light"
-                            android:text="@{Integer.toString(participant.deaths)}"/>
+                            android:text="@{Integer.toString(participant.ParticipantDto.deaths)}"/>
                         <TextView
                             android:id="@+id/result_recyclerview_assist"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:textSize="20sp"
-                            android:text="@{'/' + Integer.toString(participant.assists)}"/>
+                            android:text="@{'/' + Integer.toString(participant.ParticipantDto.assists)}"/>
 
                     </LinearLayout>
 
