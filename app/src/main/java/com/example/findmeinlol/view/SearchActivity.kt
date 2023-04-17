@@ -2,6 +2,7 @@ package com.example.findmeinlol.view
 
 import android.app.AlertDialog
 import android.content.Intent
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 
 import android.view.MenuItem
@@ -13,6 +14,7 @@ import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.findmeinlol.CustomProgressDialog
 import com.example.findmeinlol.R
 import com.example.findmeinlol.RiotAPIRepository
 import com.example.findmeinlol.databinding.ActivitySearchBinding
@@ -33,19 +35,17 @@ class SearchActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySearchBinding
     private lateinit var searchViewModel: SearchViewModel
     private lateinit var searchViewRecyclerAdapter: SearchViewRecyclerAdapter
+    private val progressDialog by lazy { CustomProgressDialog(this) }
 
     private val callBackListener = object: CallBack{
         override fun onFinished() {
+            if (progressDialog.isShowing) progressDialog.dismiss()
+
             val summoner: Summoner = searchViewModel.getSummoner()
 
             summoner.participantList.sort()
-
-
-            summoner.summonerDto?.let {
-                if (searchViewModel.getSearchModel().isName(it.name)) return
-            }
-
             searchViewModel.addSummoner()
+
             val intent = Intent(applicationContext, SearchResultActivity::class.java)
             intent.putExtra("Summoner", Gson().toJson(summoner))
             startActivity(intent)
@@ -95,6 +95,8 @@ class SearchActivity : AppCompatActivity() {
                 searchViewModel.getSearchModel().setSummoner(it)
             }
             else {
+                if (progressDialog.isShowing) progressDialog.dismiss()
+
                 val alertDialog = AlertDialog.Builder(this)
                     .setPositiveButton("확인") { dialog, _ -> dialog.dismiss() }
                 alertDialog.setMessage("존재하지않는 소환사입니다.")
@@ -144,8 +146,20 @@ class SearchActivity : AppCompatActivity() {
 
     private fun setListener() {
         binding.searchSearchView.setOnQueryTextListener(object: SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(query: String?): Boolean {
-                query?.let { RiotAPIRepository.getSummoner(it) }
+            override fun onQueryTextSubmit(query: String): Boolean {
+                val summonerIdx = searchViewModel.getSummonerIndex(query)
+                if (summonerIdx == -1) {
+                    progressDialog.window?.setBackgroundDrawable(
+                        ColorDrawable(android.graphics.Color.TRANSPARENT))
+                    progressDialog.show()
+                    query?.let { RiotAPIRepository.getSummoner(it) }
+                }
+                else {
+                    val summoner = searchViewModel.getSummoner(summonerIdx)
+                    val intent = Intent(applicationContext, SearchResultActivity::class.java)
+                    intent.putExtra("Summoner", Gson().toJson(summoner))
+                    startActivity(intent)
+                }
                 return false
             }
 

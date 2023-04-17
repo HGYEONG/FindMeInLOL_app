@@ -14,10 +14,7 @@ import com.google.gson.Gson
 import okhttp3.ResponseBody
 import org.json.JSONArray
 import org.json.JSONObject
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
-import retrofit2.Retrofit
+import retrofit2.*
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 
@@ -55,60 +52,12 @@ object RiotAPIRepository : ApiCallback {
     private var spellNames: HashMap<String, String> = hashMapOf()
     private var runeNames: HashMap<Int, String> = hashMapOf()
 
-    private val riotAPI = Retrofit.Builder()
-        .baseUrl(RIOT_URL)
-        .addConverterFactory(GsonConverterFactory.create())
-        .build()
-        .create(RiotApiKotlin::class.java)
-
-    private val riotProfileImageAPI = Retrofit.Builder()
-        .baseUrl(RIOT_PROFILE_IMAGE_URL)
-        .addConverterFactory(GsonConverterFactory.create())
-        .build()
-        .create(RiotApiKotlin::class.java)
-
-    private val riotMatchAPI = Retrofit.Builder()
-        .baseUrl(RIOT_MATCH_URL)
-        .addConverterFactory(GsonConverterFactory.create())
-        .build()
-        .create(RiotApiKotlin::class.java)
-
-    private val riotChampionImageAPI = Retrofit.Builder()
-        .baseUrl(RIOT_CHAMPION_IMAGE_URL)
-        .addConverterFactory(GsonConverterFactory.create())
-        .build()
-        .create(RiotApiKotlin::class.java)
-
-    private val riotItemImageAPI = Retrofit.Builder()
-        .baseUrl(RIOT_ITEM_IMAGE_URL)
-        .addConverterFactory(GsonConverterFactory.create())
-        .build()
-        .create(RiotApiKotlin::class.java)
-
-    private val riotSpellImageApi = Retrofit.Builder()
-        .baseUrl(RIOT_SPELL_IMAGE_URL)
-        .addConverterFactory(GsonConverterFactory.create())
-        .build()
-        .create(RiotApiKotlin::class.java)
-
-    private val riotRuneImageApi = Retrofit.Builder()
-        .baseUrl(RIOT_RUNE_IMAGE_URL)
-        .addConverterFactory(GsonConverterFactory.create())
-        .build()
-        .create(RiotApiKotlin::class.java)
-
-    private val riotJsonApi = Retrofit.Builder()
-        .baseUrl(RIOT_JSON_URL)
-        .addConverterFactory(GsonConverterFactory.create())
-        .build()
-        .create(RiotApiKotlin::class.java)
-
     init {
         getJson()
     }
 
     private fun getJson() {
-        riotJsonApi.getJson("summoner.json").enqueue(object: Callback<Any> {
+        getAPI(RIOT_JSON_URL).getJson("summoner.json").enqueue(object: Callback<Any> {
             override fun onResponse(call: Call<Any>, response: Response<Any>) {
                 val json = Gson().toJson(response.body())
                 var jsonObject = JSONObject(json)
@@ -126,7 +75,7 @@ object RiotAPIRepository : ApiCallback {
             }
         })
 
-        riotJsonApi.getJson("runesReforged.json").enqueue(object: Callback<Any> {
+        getAPI(RIOT_JSON_URL).getJson("runesReforged.json").enqueue(object: Callback<Any> {
             override fun onResponse(call: Call<Any>, response: Response<Any>) {
                 val json = Gson().toJson(response.body())
                 val jsonArray = JSONArray(json)
@@ -152,7 +101,7 @@ object RiotAPIRepository : ApiCallback {
     }
 
     fun getSummoner(name: String) {
-        riotAPI.getSummoner(name, BuildConfig.riot_api_key).enqueue(object : Callback<Summoner.SummonerDto> {
+        getAPI(RIOT_URL).getSummoner(name, BuildConfig.riot_api_key).enqueue(object : Callback<Summoner.SummonerDto> {
             override fun onResponse(
                 call: Call<Summoner.SummonerDto>,
                 response: Response<Summoner.SummonerDto>
@@ -175,7 +124,7 @@ object RiotAPIRepository : ApiCallback {
     private fun getLeagueEntry() {
         val id: String = summonerLiveData.value!!.summonerDto!!.id
 
-        riotAPI.getLeagueEntry(id, BuildConfig.riot_api_key)
+        getAPI(RIOT_URL).getLeagueEntry(id, BuildConfig.riot_api_key)
             .enqueue(object : Callback<ArrayList<Summoner.LeagueEntry>> {
                 @RequiresApi(Build.VERSION_CODES.S)
                 override fun onResponse(
@@ -208,7 +157,7 @@ object RiotAPIRepository : ApiCallback {
         var profileIconId: Int = summonerLiveData.value!!.summonerDto!!.profileIconId
         var path = """${profileIconId}.png"""
 
-        riotProfileImageAPI.getImage(path).enqueue(object : Callback<ResponseBody> {
+        getAPI(RIOT_PROFILE_IMAGE_URL).getImage(path).enqueue(object : Callback<ResponseBody> {
             override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
                 if (response.isSuccessful) {
                     response.body()?.let {
@@ -228,7 +177,7 @@ object RiotAPIRepository : ApiCallback {
     private fun getMatch() {
         val puuId: String = summonerLiveData.value!!.summonerDto!!.puuId
 
-        riotMatchAPI.getMatchesId(puuId, BuildConfig.riot_api_key, 0, 19)
+        getAPI(RIOT_MATCH_URL).getMatchesId(puuId, BuildConfig.riot_api_key, 0, 19)
             .enqueue(object : Callback<ArrayList<String>> {
                 override fun onResponse(
                     call: Call<ArrayList<String>>,
@@ -247,7 +196,7 @@ object RiotAPIRepository : ApiCallback {
     }
 
     private fun getMatchDetail(matchId: String) {
-        riotMatchAPI.getMatchDetail(matchId, BuildConfig.riot_api_key)
+        getAPI(RIOT_MATCH_URL).getMatchDetail(matchId, BuildConfig.riot_api_key)
             .enqueue(object : Callback<Match> {
                 override fun onResponse(call: Call<Match>, response: Response<Match>) {
                     if (response.isSuccessful) {
@@ -280,7 +229,7 @@ object RiotAPIRepository : ApiCallback {
         val path = """${championName}.png"""
         var item = Item()
 
-        riotChampionImageAPI.getImage(path).enqueue(object : Callback<ResponseBody> {
+        getAPI(RIOT_CHAMPION_IMAGE_URL).getImage(path).enqueue(object : Callback<ResponseBody> {
             override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
                 if (response.isSuccessful) {
                     response.body()?.let {
@@ -299,7 +248,7 @@ object RiotAPIRepository : ApiCallback {
     private fun getItemImage(matchId: String, itemId: Int, pos: Int) {
         val path = """${itemId}.png"""
 
-        riotItemImageAPI.getImage(path).enqueue(object : Callback<ResponseBody> {
+        getAPI(RIOT_ITEM_IMAGE_URL).getImage(path).enqueue(object : Callback<ResponseBody> {
             override fun onResponse(
                 call: Call<ResponseBody>,
                 response: Response<ResponseBody>
@@ -325,7 +274,7 @@ object RiotAPIRepository : ApiCallback {
     private fun getSpellImage(matchId: String, spellId: Int, pos: Int) {
         val path: String = spellNames[spellId.toString()] + ".png"
 
-        riotSpellImageApi.getImage(path).enqueue(object: Callback<ResponseBody> {
+        getAPI(RIOT_SPELL_IMAGE_URL).getImage(path).enqueue(object: Callback<ResponseBody> {
             override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
                 var item = Item()
                 item.matchId = matchId
@@ -350,7 +299,7 @@ object RiotAPIRepository : ApiCallback {
     private fun getRuneImage(matchId: String, runeId: Int, pos: Int) {
         val path: String = runeNames[runeId].toString()
 
-        riotRuneImageApi.getImage(path).enqueue(object: Callback<ResponseBody> {
+        getAPI(RIOT_RUNE_IMAGE_URL).getImage(path).enqueue(object: Callback<ResponseBody> {
             override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
                 var item = Item()
                 item.matchId = matchId
@@ -370,6 +319,11 @@ object RiotAPIRepository : ApiCallback {
 
             }
         })
+    }
+
+    private fun getAPI(url: String): RiotApiKotlin {
+        return Retrofit.Builder().baseUrl(url).addConverterFactory(GsonConverterFactory.create())
+            .build().create(RiotApiKotlin::class.java)
     }
 
     private fun setIds() {

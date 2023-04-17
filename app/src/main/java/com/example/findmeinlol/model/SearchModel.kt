@@ -13,8 +13,7 @@ object SearchModel {
 
     fun addSummoner() = summonerList.add(summoner)
 
-    fun isName(name: String): Boolean =
-        (summonerList.asSequence().filter { it.summonerDto!!.name == name }.firstOrNull() != null)
+    fun getSummonerIndex(name: String): Int = summonerList.indexOfFirst { it.summonerDto!!.name == name }
 
     fun getSummoner(): Summoner = summoner
 

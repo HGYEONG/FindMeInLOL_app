@@ -28,6 +28,8 @@ class SearchViewModel: ViewModel() {
 
     fun getSummoner(idx: Int): Summoner = searchModel.getSummoner(idx)
 
+    fun getSummonerIndex(name: String): Int = searchModel.getSummonerIndex(name)
+
     fun deleteSummoner(idx: Int) {
         searchModel.deleteSummoner(idx)
         summonerListLiveData.value = searchModel.getSummonerList()
