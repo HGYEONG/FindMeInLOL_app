@@ -33,9 +33,6 @@ interface RiotApiKotlin {
     @GET("/lol/match/v5/matches/{matchId}")
     fun getMatchDetail(@Path("matchId") matchId: String, @Query("api_key") api: String): Call<Match>
 
-    @GET("summoner.json")
-    fun getSpellJson(): Call<Any>
-
-    @GET("runesReforged.json")
-    fun getRuneJson(): Call<Any>
+    @GET("{jsonName}")
+    fun getJson(@Path("jsonName") jsonName: String): Call<Any>
 }

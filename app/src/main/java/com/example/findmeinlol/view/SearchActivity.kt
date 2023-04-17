@@ -1,11 +1,11 @@
 package com.example.findmeinlol.view
 
+import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
 
 import android.view.MenuItem
 import android.view.View
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.databinding.DataBindingUtil
@@ -39,6 +39,7 @@ class SearchActivity : AppCompatActivity() {
             val summoner: Summoner = searchViewModel.getSummoner()
 
             summoner.participantList.sort()
+
 
             summoner.summonerDto?.let {
                 if (searchViewModel.getSearchModel().isName(it.name)) return
@@ -90,11 +91,11 @@ class SearchActivity : AppCompatActivity() {
         }
 
         RiotAPIRepository.summonerLiveData.observe(this) {
-            if (it != null) {
+            if (it.summonerDto != null) {
                 searchViewModel.getSearchModel().setSummoner(it)
             }
             else {
-                val alertDialog = AlertDialog.Builder(applicationContext)
+                val alertDialog = AlertDialog.Builder(this)
                     .setPositiveButton("확인") { dialog, _ -> dialog.dismiss() }
                 alertDialog.setMessage("존재하지않는 소환사입니다.")
                 alertDialog.show()
@@ -108,35 +109,35 @@ class SearchActivity : AppCompatActivity() {
         RiotAPIRepository.championIconLiveData.observe(this) {
             searchViewModel.getParticipantList()
                 .asSequence()
-                .filter { p -> p.matchId == it.matchId}
+                .filter { p -> p.matchId == it.matchId }
                 .first().championIcon = it.bitmap
         }
 
         RiotAPIRepository.itemIconLiveData.observe(this) {
-            searchViewModel.getParticipantList()
-                .asSequence()
-                .filter { p -> p.matchId == it.matchId}
-                .first().itemIcons[it.number] = it.bitmap
-        }
-
-        RiotAPIRepository.spellIconLiveData.observe(this) {
             count++
 
             searchViewModel.getParticipantList()
                 .asSequence()
-                .filter { p -> p.matchId == it.matchId}
-                .first().spellIcons[it.number] = it.bitmap
+                .filter { p -> p.matchId == it.matchId }
+                .first().itemIcons[it.number] = it.bitmap
 
-            if (count == RiotAPIRepository.matchSizeLiveData.value!! * 2) {
+            if (count == RiotAPIRepository.matchSizeLiveData.value!! * 7) {
                 callBackListener.onFinished()
                 count = 0
             }
         }
 
+        RiotAPIRepository.spellIconLiveData.observe(this) {
+            searchViewModel.getParticipantList()
+                .asSequence()
+                .filter { p -> p.matchId == it.matchId }
+                .first().spellIcons[it.number] = it.bitmap
+        }
+
         RiotAPIRepository.runeIconLiveData.observe(this) {
             searchViewModel.getParticipantList()
                 .asSequence()
-                .filter { p -> p.matchId == it.matchId}
+                .filter { p -> p.matchId == it.matchId }
                 .first().runeIcons[it.number] = it.bitmap
         }
     }

@@ -100,27 +100,27 @@ class SearchResultViewRecyclerAdapter(searchResultViewModel: SearchResultViewMod
             )
         }
 
-        if (participant.participantDto!!.win) {
+
+        var resultText = if (participant.participantDto!!.win) {
             holder.resultRecyclerviewItemBinding.resultRecyclerviewResult.setBackgroundColor(
                 Color.parseColor(
                     "#50B4FF"
                 )
             )
-            holder.resultRecyclerviewItemBinding.resultRecyclerviewResult.text = """
-                승
-                시간
-                """
+            "승"
         } else {
             holder.resultRecyclerviewItemBinding.resultRecyclerviewResult.setBackgroundColor(
                 Color.parseColor(
                     "#FF8282"
                 )
             )
-            holder.resultRecyclerviewItemBinding.resultRecyclerviewResult.text = """
-                패
-                시간
-                """
+            "패"
         }
+
+        holder.resultRecyclerviewItemBinding.resultRecyclerviewResult.text = """
+            $resultText
+            ${participant.gameDuration}
+        """.trimIndent()
     }
 
     override fun getItemCount(): Int {

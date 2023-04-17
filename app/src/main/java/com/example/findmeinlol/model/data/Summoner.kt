@@ -20,16 +20,16 @@ data class Summoner(
         val name: String,
         @SerializedName("profileIconId")
         val profileIconId: Int,
-        @SerializedName("level")
+        @SerializedName("summonerLevel")
         val level: Long
     )
 
     data class LeagueEntry(
         @SerializedName("tier")
-        var tier: String,
+        var tier: String = "UNRANK",
         @SerializedName("rank")
-        var rank: String,
+        var rank: String = "",
         @SerializedName("queueType")
-        var queueType: String
+        var queueType: String = ""
     )
 }

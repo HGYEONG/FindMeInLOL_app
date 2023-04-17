@@ -9,7 +9,9 @@ data class Participant(
     var championIcon: Bitmap? = null,
     var itemIcons: Array<Bitmap?> = arrayOfNulls(7),
     var spellIcons: Array<Bitmap?> = arrayOfNulls(2),
-    var runeIcons: Array<Bitmap?> = arrayOfNulls(2)
+    var runeIcons: Array<Bitmap?> = arrayOfNulls<Bitmap>(2),
+    var gameDuration: String = "",
+    var queueType: String = ""
 ): Comparable<Participant> {
 
     data class ParticipantDto(

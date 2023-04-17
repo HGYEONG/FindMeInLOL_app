@@ -35,10 +35,5 @@ class SearchViewModel: ViewModel() {
 
     fun addParticipant(participant: Participant) = searchModel.addParticipant(participant)
 
-    fun setParticipant(participant: Participant) = searchModel.setParticipant(participant)
-
-    fun getParticipant(): Participant = searchModel.getParticipant()
-
     fun getParticipantList(): ArrayList<Participant> = searchModel.getParticipantList()
-
 }

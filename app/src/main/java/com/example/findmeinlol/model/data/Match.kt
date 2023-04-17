@@ -11,9 +11,13 @@ data class Match(
     data class Info(
         @SerializedName("participants")
         val participants: ArrayList<Participant.ParticipantDto>,
+        @SerializedName("gameDuration")
+        val gameDuration: Long,
         @SerializedName("gameStartTimeStamp")
         val gameStartTimeStamp: Long,
         @SerializedName("gameEndTimeStamp")
-        val gameEndTimestamp: Long
+        val gameEndTimestamp: Long,
+        @SerializedName("queueId")
+        val queueId: Int
     )
 }

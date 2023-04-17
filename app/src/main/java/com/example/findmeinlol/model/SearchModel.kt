@@ -6,7 +6,6 @@ import com.example.findmeinlol.model.data.Summoner
 object SearchModel {
     private var summonerList: ArrayList<Summoner> = ArrayList()
     private var summoner: Summoner = Summoner()
-    private var participant: Participant = Participant()
 
     fun setSummoner(s: Summoner) {
         this.summoner = s
@@ -30,12 +29,6 @@ object SearchModel {
     fun deleteSummoner(idx: Int) = summonerList.removeAt(idx)
 
     fun addParticipant(p: Participant) = summoner.participantList.add(p)
-
-    fun setParticipant(p: Participant) {
-        this.participant = p
-    }
-
-    fun getParticipant(): Participant = participant
 
     fun getParticipantList(): ArrayList<Participant> = summoner.participantList
 }

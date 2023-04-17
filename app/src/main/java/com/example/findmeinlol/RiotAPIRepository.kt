@@ -19,6 +19,7 @@ import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.util.concurrent.TimeUnit
 
 private interface ApiCallback {
     fun onUpdated()
@@ -35,8 +36,7 @@ object RiotAPIRepository : ApiCallback {
     private const val RIOT_ITEM_IMAGE_URL: String =
         "https://ddragon.leagueoflegends.com/cdn/13.3.1/img/item/";
     private const val RIOT_MATCH_URL: String = "https://asia.api.riotgames.com/";
-    private const val RIOT_SPELL_JSON_URL: String = "https://ddragon.leagueoflegends.com/cdn/13.5.1/data/en_US/"
-    private const val RIOT_RUNES_JSON_URL: String = "https://ddragon.leagueoflegends.com/cdn/13.5.1/data/en_US/"
+    private const val RIOT_JSON_URL: String = "https://ddragon.leagueoflegends.com/cdn/13.5.1/data/en_US/"
     private const val RIOT_SPELL_IMAGE_URL: String = "https://ddragon.leagueoflegends.com/cdn/13.3.1/img/spell/"
     private const val RIOT_RUNE_IMAGE_URL: String =  "https://ddragon.leagueoflegends.com/cdn/img/"
 
@@ -47,7 +47,6 @@ object RiotAPIRepository : ApiCallback {
     var itemIconLiveData: MutableLiveData<Item> = MutableLiveData()
     var spellIconLiveData: MutableLiveData<Item> = MutableLiveData()
     var runeIconLiveData: MutableLiveData<Item> = MutableLiveData()
-    lateinit var callback: CallBack
 
     private var itemIds: ArrayList<Int> = ArrayList()
     private var spellIds: ArrayList<Int> = ArrayList()
@@ -86,18 +85,6 @@ object RiotAPIRepository : ApiCallback {
         .build()
         .create(RiotApiKotlin::class.java)
 
-    private val riotSpellJsonApi = Retrofit.Builder()
-        .baseUrl(RIOT_SPELL_JSON_URL)
-        .addConverterFactory(GsonConverterFactory.create())
-        .build()
-        .create(RiotApiKotlin::class.java)
-
-    private val riotRuneJsonApi = Retrofit.Builder()
-        .baseUrl(RIOT_RUNES_JSON_URL)
-        .addConverterFactory(GsonConverterFactory.create())
-        .build()
-        .create(RiotApiKotlin::class.java)
-
     private val riotSpellImageApi = Retrofit.Builder()
         .baseUrl(RIOT_SPELL_IMAGE_URL)
         .addConverterFactory(GsonConverterFactory.create())
@@ -110,13 +97,18 @@ object RiotAPIRepository : ApiCallback {
         .build()
         .create(RiotApiKotlin::class.java)
 
+    private val riotJsonApi = Retrofit.Builder()
+        .baseUrl(RIOT_JSON_URL)
+        .addConverterFactory(GsonConverterFactory.create())
+        .build()
+        .create(RiotApiKotlin::class.java)
+
     init {
-        getSpellJson()
-        getRuneJson()
+        getJson()
     }
 
-    private fun getSpellJson() {
-        riotSpellJsonApi.getSpellJson().enqueue(object: Callback<Any> {
+    private fun getJson() {
+        riotJsonApi.getJson("summoner.json").enqueue(object: Callback<Any> {
             override fun onResponse(call: Call<Any>, response: Response<Any>) {
                 val json = Gson().toJson(response.body())
                 var jsonObject = JSONObject(json)
@@ -133,10 +125,8 @@ object RiotAPIRepository : ApiCallback {
 
             }
         })
-    }
 
-    private fun getRuneJson() {
-        riotRuneJsonApi.getRuneJson().enqueue(object: Callback<Any> {
+        riotJsonApi.getJson("runesReforged.json").enqueue(object: Callback<Any> {
             override fun onResponse(call: Call<Any>, response: Response<Any>) {
                 val json = Gson().toJson(response.body())
                 val jsonArray = JSONArray(json)
@@ -194,18 +184,14 @@ object RiotAPIRepository : ApiCallback {
                 ) {
                     var path: String =
                         "android.resource://" + R::class.java.packageName.toString() + "/";
-                    val leagueEntry: Summoner.LeagueEntry?
-                    Log.d("*****", response.body().toString())
+                    var leagueEntry = Summoner.LeagueEntry()
+
                     if (response.isSuccessful) {
-                        if (response.body()?.isEmpty() == true) {
-                            var leagueEntryTemp = Summoner.LeagueEntry("UNRANK", "", "")
-                            path += getResourceId("UNRANK")
-                            summonerLiveData.value!!.leagueEntry = leagueEntryTemp
-                        } else {
+                        if (response.body()?.isEmpty() != true) {
                             leagueEntry = response.body()!![0]
-                            path += getResourceId(leagueEntry.tier)
-                            summonerLiveData.value!!.leagueEntry = leagueEntry
                         }
+                        path += getResourceId(leagueEntry.tier)
+                        summonerLiveData.value!!.leagueEntry = leagueEntry
                         summonerLiveData.value!!.tierIconId = path
 
                         getIconImage()
@@ -273,7 +259,8 @@ object RiotAPIRepository : ApiCallback {
                                 .filter { p -> p.summonerName == summonerLiveData.value!!.summonerDto!!.name }
                                 .first()
 
-                            var participant = Participant();
+                            var participant = Participant()
+                            participant.gameDuration = getGameDuration(it.info.gameDuration)
                             participant.matchId = matchId
                             participant.participantDto = participantDto
                             participantLiveData.value = participant
@@ -326,7 +313,6 @@ object RiotAPIRepository : ApiCallback {
                 } else {
                     item.bitmap = null
                 }
-
                 itemIconLiveData.value = item
             }
 
@@ -417,6 +403,14 @@ object RiotAPIRepository : ApiCallback {
                 R.drawable.emblem_unrank
             }
         }
+    }
+
+    private fun getGameDuration(gameDuration: Long): String {
+        val minute = TimeUnit.SECONDS.toMinutes(gameDuration)
+        - TimeUnit.SECONDS.toHours(gameDuration) * 60
+        val second = gameDuration - minute * 60
+
+        return """${minute}:${second}"""
     }
 
     override fun onUpdated() {
